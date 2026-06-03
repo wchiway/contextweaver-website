@@ -76,3 +76,7 @@ cw search \
   --information-request "数据库连接逻辑" \
   --technical-terms "DatabasePool,Connection"
 ```
+
+## 下一步
+
+想让 AI 客户端直接检索代码库，请参阅 [MCP 集成](./mcp.md)，其中包含 Codex 与 Claude Code 的配置示例。

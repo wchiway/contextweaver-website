@@ -76,3 +76,7 @@ cw search \
   --information-request "Database connection logic" \
   --technical-terms "DatabasePool,Connection"
 ```
+
+## Next steps
+
+To let an AI client retrieve context from your codebase directly, see [MCP Integration](./mcp.md), which includes setup examples for Codex and Claude Code.
