@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ContextWeaver icon">
+  <defs>
+    <linearGradient id="primary" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.48" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="52" y1="10" x2="14" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#0f172a"/>
+  <path d="M17 20c8-9 24-9 32 0 7 8 7 22 0 30-8 9-24 9-32 0" fill="none" stroke="url(#primary)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M17 50c8-9 24-9 32 0M17 20c8 9 24 9 32 0" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M23 32h18M34 25l7 7-7 7" fill="none" stroke="#f8fafc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
