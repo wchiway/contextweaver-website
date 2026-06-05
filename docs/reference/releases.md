@@ -6,6 +6,7 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 
 | Version | Type | Published | Link | Changes |
 | --- | --- | --- | --- | --- |
+| `v1.5.3-beta.1` | Beta prerelease | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta prerelease | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
 | `v1.5.3-alpha.0` | Alpha prerelease | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-alpha.0) | [v1.5.2...v1.5.3-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3-alpha.0) |
 | `v1.5.2` | Stable | 2026-06-03 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.2) | [v1.5.1...v1.5.2](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.1...v1.5.2) |
@@ -13,6 +14,81 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 | `v1.5.0` | Stable | 2026-06-02 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.0) | [v1.4.0...v1.5.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.4.0...v1.5.0) |
 | `v1.4.0` | Stable tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | Baseline commit | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
+
+## v1.5.3-beta.1
+
+[Release page](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) · [Full changes](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1)
+
+### Highlights
+
+#### Call Graph Export (Semantic Edges)
+
+- **Tree-sitter call extractor**: Extracts function call nodes from AST without external dependencies
+- **Local call graph builder**: Resolves function calls within the same file and populates the `semantic_edges` table with `kind='call'`
+- **Multi-language support**: TypeScript, JavaScript, Python, Go, Rust, Java, C, C++, C#, Ruby, PHP (11 languages)
+- **Bidirectional queries**: Find callers and callees using indexed queries on `semantic_edges`
+
+**Verification (ContextWeaver project):**
+- 385 call edges covering 96 files
+- Provider: `tree-sitter` (lightweight implementation)
+- Local call coverage: ~60-70% (as expected for same-file resolution)
+
+#### list-symbols MCP Tool
+
+- **New MCP tool** for querying symbol outlines across the codebase
+- **Multi-dimensional filtering**:
+  - Path filter (prefix or glob pattern, e.g., `src/**/*.ts`)
+  - Symbol kind filter (`function,class,interface`)
+  - Language filter (`typescript,python,go`)
+  - Source filter (`tree-sitter` / `ctags`)
+- **Markdown output**: Grouped by file with line ranges and container information
+- **Efficient SQL queries**: Path filtering handled at SQL layer (LIKE queries) to avoid post-filter LIMIT traps
+
+#### Tree-sitter Tags Symbol Extraction
+
+- Uses grammar-native `tags.scm` query files to extract symbols from AST
+- Adds patches for TypeScript/JavaScript (class/function/enum definitions)
+- Optimizes `get-symbol-definition` tool: prioritizes `semantic_symbols` table lookup with directory-aware ranking
+
+### Schema Updates
+
+- Extended `SemanticEdge.provider` type: `'lsp' | 'tree-sitter'`
+- Updated database CHECK constraint to allow `tree-sitter` as a provider
+
+### Performance
+
+- **Zero new dependencies**: Fully reuses existing tree-sitter and ParserPool infrastructure
+- **Indexing impact**: < 5% increase (call graph building has negligible overhead)
+- **Query performance**: Dual-index support for bidirectional call graph traversal
+
+### Implementation Details
+
+**New files:**
+- `src/semantic/treeSitterCalls.ts` (184 lines) — Call site extractor
+- `src/semantic/callGraphBuilder.ts` (183 lines) — Call graph builder with local resolution
+- `src/mcp/tools/listSymbols.ts` (149 lines) — Symbol listing MCP tool
+
+**Modified files:**
+- `src/semantic/types.ts` — Extended `SemanticEdge.provider`
+- `src/db/index.ts` — Updated CHECK constraint
+- `src/scanner/processor.ts` — Added `callSites` field and integrated call extraction
+- `src/scanner/index.ts` — Invokes `buildAndStoreCallGraph`
+- `src/mcp/server.ts` — Registered `list-symbols` tool
+
+### Future Enhancements (Not Implemented)
+
+- **Cross-file call resolution** (Phase 2): Use resolver + symbol disambiguation for inter-file calls
+- **Call graph query MCP tools**: Direct call relationship queries (e.g., `find-callers`, `find-callees`)
+- **QueryPlanner integration**: Recognize symbol query intent and route to symbol table for exact matches
+- **Incremental symbol indexing**: Hook into watcher for file-change-triggered updates
+
+### Testing and installation
+
+This version is not published to npm. Download the `.tgz` asset from the Release page and install it locally:
+
+```bash
+npm install -g ./chiway-contextweaver-1.5.3-beta.1.tgz
+```
 
 ## v1.5.3-beta.0
 
