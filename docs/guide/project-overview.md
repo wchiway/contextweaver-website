@@ -1,43 +1,43 @@
-# 项目总览
+# Project Overview
 
-ContextWeaver 是一个面向 AI 代码助手的代码库上下文引擎。它不是通用搜索 UI，而是为 LLM/Agent 提供“可检索、可扩展、可打包”的代码上下文。
+ContextWeaver is a codebase context engine built for AI coding agents. It is not a generic search UI; it is designed to provide LLMs and agents with code context that can be retrieved, expanded, and packed within a budget.
 
-## 解决的问题
+## Problems it solves
 
-大型代码库中，Agent 经常遇到三个问题：
+Agents often struggle with three issues in large codebases:
 
-1. **只靠 grep 不理解语义**：自然语言问题无法稳定映射到相关实现。
-2. **只靠向量搜索不够精确**：函数名、类名、配置项等技术术语需要精确匹配。
-3. **命中片段太孤立**：单个 chunk 缺少相邻代码、类结构和跨文件依赖。
+1. **grep does not understand intent**: natural language questions do not reliably map to relevant implementations.
+2. **vector search is not precise enough by itself**: function names, class names, config keys, and technical terms need exact matching.
+3. **matched chunks are often isolated**: a single chunk may miss neighboring code, structural breadcrumbs, or cross-file dependencies.
 
-ContextWeaver 的核心策略是：
+ContextWeaver's core strategy is:
 
 ```text
-混合召回 → RRF 融合 → Rerank 精排 → 图式扩展 → Token 感知打包
+Hybrid Recall → RRF Fusion → Rerank → Graph Expansion → Token-Aware Packing
 ```
 
-## 面向的使用者
+## Intended users
 
-- 使用 MCP 客户端的 AI Agent
-- 想为项目添加语义代码检索能力的开发者
-- 需要在本地构建代码 RAG 的工程团队
-- 想二次开发代码索引、搜索、MCP 工具或多语言分片能力的贡献者
+- AI agents using MCP clients
+- Developers adding semantic code retrieval to a project
+- Engineering teams building local code RAG systems
+- Contributors extending indexing, search, MCP tools, or multi-language chunking
 
-## 核心能力
+## Core capabilities
 
-| 能力 | 说明 |
-|------|------|
-| 语义检索 | 使用 Embedding 做向量召回，理解自然语言意图 |
-| 词法检索 | 使用 SQLite FTS5 精确匹配符号名、路径、术语 |
-| AST 分片 | 使用 Tree-sitter 尽量按函数、类、模块边界切分 |
-| 上下文扩展 | 基于邻居、面包屑和 import 关系补齐上下文 |
-| Token 打包 | 在预算内合并、排序和裁剪结果 |
-| MCP 工具 | 暴露给 Claude 等支持 MCP 的客户端 |
-| CLI 镜像 | 为常用 MCP 工具提供本地 CLI 命令 |
+| Capability | Description |
+|------------|-------------|
+| Semantic retrieval | Uses embeddings for vector recall and natural language intent |
+| Lexical retrieval | Uses SQLite FTS5 to match symbols, paths, and technical terms |
+| AST chunking | Uses Tree-sitter to split by functions, classes, and module boundaries |
+| Context expansion | Adds neighbors, breadcrumbs, and import-related files |
+| Token packing | Merges, ranks, and trims results within a budget |
+| MCP tools | Exposes retrieval and structure tools to MCP clients |
+| CLI mirrors | Provides local CLI commands for selected MCP tools |
 
-## 运行时边界
+## Runtime boundary
 
-ContextWeaver 会把索引数据写入：
+ContextWeaver writes index data to:
 
 ```text
 ~/.contextweaver/<projectId>/
@@ -45,17 +45,17 @@ ContextWeaver 会把索引数据写入：
 └── vectors.lance/
 ```
 
-源码项目本身不保存索引结果。Embedding/Rerank API Key 通过 `~/.contextweaver/.env` 配置。
+The source repository does not store index results. Embedding and rerank API keys are configured through `~/.contextweaver/.env`.
 
-## 开发者需要优先理解的模块
+## Recommended source reading order
 
-建议按这个顺序阅读源码：
+If you are developing ContextWeaver, read the source in this order:
 
-1. `src/index.ts`：CLI 入口与命令注册
-2. `src/scanner/index.ts`：扫描与增量索引入口
-3. `src/chunking/SemanticSplitter.ts`：语义分片
-4. `src/indexer/index.ts`：跨库写入与事务补偿
-5. `src/search/SearchService.ts`：搜索主流程
-6. `src/search/GraphExpander.ts`：上下文扩展
-7. `src/search/ContextPacker.ts`：上下文打包
-8. `src/mcp/server.ts` 与 `src/mcp/tools/*`：MCP 工具层
+1. `src/index.ts`: CLI entrypoint and command registration
+2. `src/scanner/index.ts`: scanning and incremental indexing entrypoint
+3. `src/chunking/SemanticSplitter.ts`: semantic chunking
+4. `src/indexer/index.ts`: cross-store writes and compensation
+5. `src/search/SearchService.ts`: main search pipeline
+6. `src/search/GraphExpander.ts`: context expansion
+7. `src/search/ContextPacker.ts`: context packing
+8. `src/mcp/server.ts` and `src/mcp/tools/*`: MCP tool layer

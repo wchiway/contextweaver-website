@@ -1,10 +1,10 @@
-# 故障排查
+# Troubleshooting
 
-本页收集开发和使用 ContextWeaver 时常见问题。
+This page covers common issues when developing or using ContextWeaver.
 
-## Embedding 或 Rerank API 报错
+## Embedding or Rerank API errors
 
-检查 `~/.contextweaver/.env`：
+Check `~/.contextweaver/.env`:
 
 ```bash
 EMBEDDINGS_API_KEY=...
@@ -15,53 +15,53 @@ RERANK_BASE_URL=...
 RERANK_MODEL=...
 ```
 
-开启 debug 日志：
+Enable debug logging:
 
 ```bash
 LOG_LEVEL=debug contextweaver search --information-request "..."
 ```
 
-日志位置：
+Logs are stored at:
 
 ```text
 ~/.contextweaver/logs/app.YYYY-MM-DD.log
 ```
 
-## 迁移状态 aborted
+## Migration state is aborted
 
-现象：Indexer 拒绝写入，stats 或日志提示 LanceDB migration aborted。
+Symptom: Indexer refuses writes, or stats/logs mention LanceDB migration aborted.
 
-处理：
+Fix:
 
 ```bash
 contextweaver migrate --reset
 contextweaver index /path/to/project
 ```
 
-含义：清空 LanceDB 并让下次索引重建向量表。
+This clears LanceDB and lets the next index rebuild the vector table.
 
-## pending_marks 积压
+## pending_marks backlog
 
-`pending_marks` 表示 FTS 已写入，但 SQLite mark 阶段失败。正常情况下 bootstrap 会自动 replay。
+`pending_marks` means FTS was written but the SQLite mark stage failed. Bootstrap normally replays these marks automatically.
 
-检查：
+Check:
 
 ```bash
 contextweaver stats --path /path/to/project
 ```
 
-如果持续积压，优先查看日志中 SQLite 写入错误。
+If the backlog persists, inspect logs for SQLite write errors.
 
-## 搜索结果缺少上下文
+## Search results lack context
 
-可能原因：
+Possible causes:
 
-- `CW_SEARCH_IMPORT_FILES_PER_SEED=0` 关闭了跨文件扩展
-- `CW_SEARCH_MAX_TOTAL_CHARS` 太低
-- import resolver 不支持当前语言或路径风格
-- 文件未成功索引
+- `CW_SEARCH_IMPORT_FILES_PER_SEED=0` disables cross-file expansion
+- `CW_SEARCH_MAX_TOTAL_CHARS` is too low
+- import resolver does not support the language or path style
+- files were not indexed successfully
 
-可尝试：
+Try:
 
 ```bash
 contextweaver stats --path /path/to/project
@@ -69,40 +69,40 @@ contextweaver list-files /path/to/project --glob "src/**/*.ts"
 contextweaver index /path/to/project --force
 ```
 
-## 搜索太慢
+## Search is slow
 
-检查：
+Check:
 
-- 是否第一次查询，首次可能触发索引
-- Embedding/Rerank API 延迟
-- `CW_SEARCH_VECTOR_TOP_K` 是否过高
-- `CW_SEARCH_RERANK_TOP_N` 是否过高
-- 查询缓存是否命中
+- whether this is the first query and indexing is running
+- Embedding/Rerank API latency
+- whether `CW_SEARCH_VECTOR_TOP_K` is too high
+- whether `CW_SEARCH_RERANK_TOP_N` is too high
+- query cache hit rate
 
-查看 stats 中各阶段耗时：
+Inspect per-stage timings:
 
 ```bash
 contextweaver stats
 ```
 
-## 多字节字符切片错位
+## Multi-byte slicing is wrong
 
-如果展示代码出现中文或 emoji 附近错位，重点检查：
+If displayed code is misaligned around Chinese text or emoji, inspect:
 
 - `SourceAdapter.toCharOffset`
-- `SemanticSplitter` 写入 offset 的路径
-- `ChunkContentLoader` 是否仍使用 `start_index/end_index`
+- offset writing in `SemanticSplitter`
+- whether `ChunkContentLoader` still uses `start_index/end_index`
 
-相关测试：
+Related tests:
 
 ```bash
 pnpm test tests/chunking/SourceAdapter.test.ts
 pnpm test tests/search/ChunkContentLoader.test.ts
 ```
 
-## MCP 客户端没有工具
+## MCP client has no tools
 
-检查 MCP 配置：
+Check MCP config:
 
 ```json
 {
@@ -115,8 +115,8 @@ pnpm test tests/search/ChunkContentLoader.test.ts
 }
 ```
 
-如果本地没有全局命令，可以先构建并使用绝对路径或 `node dist/index.js mcp`。
+If the global command is unavailable, build locally and use an absolute command or `node dist/index.js mcp`.
 
-## VitePress 文档站构建 warning
+## VitePress website build warning
 
-当前文档站使用 Vite 8 + VitePress 2 alpha。构建可能出现 `@vueuse/core` 的 `INVALID_ANNOTATION` warning，但只要最终输出 `build complete`，站点生成成功。
+The documentation site currently uses Vite 8 + VitePress 2 alpha. Build may print `@vueuse/core` `INVALID_ANNOTATION` warnings. If the output ends with `build complete`, the site was generated successfully.

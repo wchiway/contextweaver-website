@@ -1,36 +1,36 @@
-# 快速开始
+# Getting Started
 
-## 环境要求
+## Requirements
 
 - Node.js >= 20
-- pnpm 或 npm
-- Embedding 与 Rerank API 配置
+- pnpm or npm
+- Embedding and rerank API configuration
 
-## 安装
+## Installation
 
 ```bash
 npm install -g @chiway/contextweaver
 ```
 
-也可以使用 pnpm：
+You can also install it with pnpm:
 
 ```bash
 pnpm add -g @chiway/contextweaver
 ```
 
-## 初始化配置
+## Initialize configuration
 
 ```bash
 contextweaver init
 ```
 
-简写命令：
+Short alias:
 
 ```bash
 cw init
 ```
 
-命令会创建 `~/.contextweaver/.env`。编辑该文件并填入 Embedding 与 Rerank 配置：
+The command creates `~/.contextweaver/.env`. Edit it and configure your embedding and rerank providers:
 
 ```bash
 EMBEDDINGS_API_KEY=your-api-key-here
@@ -43,40 +43,40 @@ RERANK_BASE_URL=https://api.siliconflow.cn/v1/rerank
 RERANK_MODEL=BAAI/bge-reranker-v2-m3
 ```
 
-## 索引代码库
+## Index a codebase
 
-在代码库根目录执行：
+Run this from the target repository root:
 
 ```bash
 contextweaver index
 ```
 
-指定路径：
+Index a specific path:
 
 ```bash
 contextweaver index /path/to/your/project
 ```
 
-强制重新索引：
+Force a full re-index:
 
 ```bash
 contextweaver index --force
 ```
 
-## 搜索代码
+## Search code
 
 ```bash
-cw search --information-request "用户认证流程是如何实现的？"
+cw search --information-request "How is user authentication implemented?"
 ```
 
-携带精确术语：
+Use exact technical terms when needed:
 
 ```bash
 cw search \
-  --information-request "数据库连接逻辑" \
+  --information-request "Database connection logic" \
   --technical-terms "DatabasePool,Connection"
 ```
 
-## 下一步
+## Next steps
 
-想让 AI 客户端直接检索代码库，请参阅 [MCP 集成](./mcp.md)，其中包含 Codex 与 Claude Code 的配置示例。
+To let an AI client retrieve context from your codebase directly, see [MCP Integration](./mcp.md), which includes setup examples for Codex and Claude Code.

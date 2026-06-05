@@ -1,41 +1,41 @@
-# 开发环境
+# Development Setup
 
-本页说明如何在本地开发 ContextWeaver 源项目。
+This page explains how to develop the ContextWeaver source project locally.
 
-## 环境要求
+## Requirements
 
 - Node.js >= 20
 - pnpm
-- 可用的 Embedding API 与 Rerank API
+- Available Embedding and Rerank APIs
 
-源项目使用 TypeScript ESM、tsup 打包、vitest 测试。
+The source project uses TypeScript ESM, tsup for bundling, and vitest for tests.
 
-## 安装依赖
+## Install dependencies
 
 ```bash
 cd ~/mcp/ContextWeaver
 pnpm install
 ```
 
-## 构建
+## Build
 
 ```bash
 pnpm build
 ```
 
-构建入口是 `src/index.ts`，输出到 `dist/`。
+The build entrypoint is `src/index.ts`, and output goes to `dist/`.
 
-## Watch 开发
+## Watch development
 
 ```bash
 pnpm dev
 ```
 
-这会以 watch 模式运行 tsup，适合边改边验证 CLI。
+This runs tsup in watch mode and is useful when iterating on CLI behavior.
 
-## 本地运行 CLI
+## Run the CLI locally
 
-构建后可以直接运行：
+After building, run:
 
 ```bash
 node dist/index.js --help
@@ -44,57 +44,57 @@ node dist/index.js index /path/to/project
 node dist/index.js search --information-request "..."
 ```
 
-也可以通过 package bin 使用全局安装后的命令：
+You can also use the globally installed package commands:
 
 ```bash
 contextweaver --help
 cw --help
 ```
 
-## 配置文件
+## Configuration file
 
-运行：
+Run:
 
 ```bash
 contextweaver init
 ```
 
-会创建：
+It creates:
 
 ```text
 ~/.contextweaver/.env
 ```
 
-开发环境中，配置加载逻辑在 `src/config.ts`。MCP 模式会减少 stderr 噪声，避免污染协议输出。
+Configuration loading is implemented in `src/config.ts`. MCP mode keeps stderr noise low so protocol output is not polluted.
 
-## 日志
+## Logs
 
-日志文件位置：
+Log files are stored at:
 
 ```text
 ~/.contextweaver/logs/app.YYYY-MM-DD.log
 ```
 
-调试时可设置：
+Enable debug logging:
 
 ```bash
 LOG_LEVEL=debug contextweaver search --information-request "..."
 ```
 
-## 常用命令
+## Common commands
 
-| 命令 | 作用 |
-|------|------|
-| `pnpm build` | 编译 TypeScript |
-| `pnpm dev` | watch 模式构建 |
-| `pnpm lint` | Biome 检查 |
-| `pnpm fmt` | Biome 自动修复 |
-| `pnpm typecheck` | TypeScript 类型检查 |
-| `pnpm test` | 运行 vitest |
+| Command | Purpose |
+|---------|---------|
+| `pnpm build` | Compile TypeScript |
+| `pnpm dev` | Watch-mode build |
+| `pnpm lint` | Run Biome checks |
+| `pnpm fmt` | Apply Biome fixes |
+| `pnpm typecheck` | TypeScript type check |
+| `pnpm test` | Run vitest |
 
-## 二开建议
+## Development guidance
 
-- 先用 `pnpm test` 确认基线稳定
-- 修改搜索流程时优先加 `tests/search/*`
-- 修改索引一致性时优先加 `tests/indexer/*` 或 `tests/db/*`
-- 修改真实 LanceDB 行为时加 `tests/integration/*` 或 `tests/vectorStore/*`
+- Run `pnpm test` first to confirm the baseline is stable
+- For search changes, add tests under `tests/search/*`
+- For index consistency changes, add tests under `tests/indexer/*` or `tests/db/*`
+- For real LanceDB behavior, add tests under `tests/integration/*` or `tests/vectorStore/*`

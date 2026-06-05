@@ -1,82 +1,82 @@
-# 测试指南
+# Testing Guide
 
-ContextWeaver 使用 vitest。测试覆盖单元测试、跨模块测试和真实 LanceDB 集成测试。
+ContextWeaver uses vitest. Tests cover unit logic, cross-module behavior, and real LanceDB integration scenarios.
 
-## 运行全部测试
+## Run all tests
 
 ```bash
 pnpm test
 ```
 
-## 类型检查与 lint
+## Type checking and linting
 
 ```bash
 pnpm typecheck
 pnpm lint
 ```
 
-格式化：
+Formatting:
 
 ```bash
 pnpm fmt
 ```
 
-## 测试目录结构
+## Test directory structure
 
-| 目录 | 覆盖内容 |
-|------|----------|
-| `tests/chunking/` | SourceAdapter、AST 分片、新语言支持 |
+| Directory | Coverage |
+|-----------|----------|
+| `tests/chunking/` | SourceAdapter, AST chunking, new language support |
 | `tests/cli/` | CLI mirror commands |
-| `tests/db/` | schema migration、pending marks、advisory lock、index version |
-| `tests/indexer/` | 跨库事务补偿、GC、aborted guard |
-| `tests/integration/` | 真实 LanceDB 端到端场景 |
-| `tests/mcp/` | MCP 工具 handler 与注册 |
-| `tests/scanner/` | scanner、watcher、index version |
-| `tests/search/` | FTS、SearchService、QueryCache、ContextPacker、配置加载 |
-| `tests/stats/` | 统计聚合与诊断 |
-| `tests/vectorStore/` | chunk_id 去重、抽样校验 |
+| `tests/db/` | schema migration, pending marks, advisory lock, index version |
+| `tests/indexer/` | cross-store compensation, GC, aborted guard |
+| `tests/integration/` | real LanceDB end-to-end scenarios |
+| `tests/mcp/` | MCP tool handlers and registration |
+| `tests/scanner/` | scanner, watcher, index version |
+| `tests/search/` | FTS, SearchService, QueryCache, ContextPacker, config loading |
+| `tests/stats/` | stats aggregation and diagnostics |
+| `tests/vectorStore/` | chunk_id deduplication and sample checks |
 
-## 写测试的建议
+## Test writing guidance
 
-### 搜索逻辑
+### Search logic
 
-修改 `SearchService` 时，应覆盖：
+When changing `SearchService`, cover:
 
 - cache hit / miss
-- vector 与 lexical 融合
-- rerank 输入截断
-- Smart TopK 边界
-- stats 记录
+- vector and lexical fusion
+- rerank input truncation
+- Smart TopK boundaries
+- stats recording
 
-### 索引一致性
+### Index consistency
 
-修改 `Indexer`、`Database` 或 `VectorStore` 时，应覆盖失败补偿：
+When changing `Indexer`, `Database`, or `VectorStore`, cover failure compensation:
 
-| 场景 | 应验证 |
-|------|--------|
-| LanceDB 写入失败 | SQLite mark 不应错误更新 |
-| FTS 写入失败 | LanceDB 新 chunks 应回滚 |
-| mark 失败 | `pending_marks` 应保留并可 replay |
-| migration aborted | Indexer 应拒绝写入 |
+| Scenario | Verify |
+|----------|--------|
+| LanceDB write failure | SQLite mark must not be incorrectly updated |
+| FTS write failure | new LanceDB chunks should be rolled back |
+| mark failure | `pending_marks` should remain and be replayable |
+| migration aborted | Indexer should refuse writes |
 
-### AST 与 offset
+### AST and offsets
 
-修改 `SemanticSplitter` 或 `SourceAdapter` 时，必须测试多字节字符：
+When changing `SemanticSplitter` or `SourceAdapter`, test multi-byte characters:
 
-- 中文
+- Chinese text
 - emoji
-- 混合换行
-- byte offset 与 UTF-16 char offset 转换
+- mixed newlines
+- byte offset to UTF-16 char offset conversion
 
-### MCP 工具
+### MCP tools
 
-新增 MCP 工具时，建议把核心逻辑做成 handler 函数，并单测 handler。CLI 镜像只负责参数解析和输出。
+For new MCP tools, implement core logic as a handler function and unit test the handler. CLI mirrors should only parse parameters and print output.
 
-## 集成测试注意事项
+## Integration test notes
 
-真实 LanceDB 测试可能涉及本地文件系统状态。测试应该使用临时目录，避免污染用户真实 `~/.contextweaver` 数据。
+Real LanceDB tests may touch local filesystem state. Tests should use temporary directories and avoid polluting the user's real `~/.contextweaver` data.
 
-## 完成任务前建议执行
+## Recommended completion checks
 
 ```bash
 pnpm typecheck
@@ -85,7 +85,7 @@ pnpm test
 pnpm build
 ```
 
-如果只改文档站，应在 `contextweaver-website` 中执行：
+If you only changed the documentation site, run this inside `contextweaver-website`:
 
 ```bash
 pnpm build

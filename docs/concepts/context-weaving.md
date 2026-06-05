@@ -1,21 +1,21 @@
-# 上下文编织
+# Context Weaving
 
-搜索命中的单个代码片段通常不足以回答问题。ContextWeaver 会围绕命中片段扩展上下文，并在 token 预算内打包结果。
+A single matched code chunk is often not enough to answer a question. ContextWeaver expands around matched chunks and packs the result within a token budget.
 
-## 三阶段扩展
+## Three expansion stages
 
-### E1 邻居扩展
+### E1 Neighbor expansion
 
-补齐同文件前后相邻 chunks，避免函数、注释或类型定义被截断。
+Add adjacent chunks from the same file so functions, comments, and type definitions are not cut off.
 
-### E2 面包屑补全
+### E2 Breadcrumb completion
 
-补齐同一类、函数或模块层级下的相关片段，让模型理解局部结构。
+Add related chunks from the same class, function, or module hierarchy so the model can understand local structure.
 
-### E3 Import 解析
+### E3 Import resolution
 
-根据 import 关系追踪跨文件依赖，帮助模型理解被调用类型、工具函数和模块边界。
+Follow import relationships across files to include referenced types, helper functions, and module boundaries.
 
-## Token 感知打包
+## Token-aware packing
 
-扩展后的片段会进入 ContextPacker。它负责合并相邻片段、去重、排序，并按预算裁剪，最终输出适合 LLM 消化的上下文包。
+Expanded snippets are passed to ContextPacker. It merges adjacent snippets, removes duplicates, sorts results, and trims output to fit the token budget before producing the final context package for the LLM.

@@ -1,31 +1,31 @@
-# 混合检索
+# Hybrid Search
 
-ContextWeaver 使用混合检索来平衡语义理解与精确匹配。
+ContextWeaver uses hybrid search to balance semantic understanding with exact matching.
 
-## 向量召回
+## Vector retrieval
 
-向量召回用于理解自然语言意图，例如：
+Vector retrieval understands natural language intent, for example:
 
 ```text
-这个项目如何处理跨文件依赖？
+How does this project handle cross-file dependencies?
 ```
 
-即使查询没有出现精确函数名，也能召回语义相关的实现片段。
+It can find semantically related implementation snippets even when the query does not contain exact function names.
 
-## 全文召回
+## Full-text retrieval
 
-全文召回适合精确术语，例如：
+Full-text retrieval is useful for exact technical terms, for example:
 
 ```text
 SearchService GraphExpander
 ```
 
-它可以稳定命中函数名、类名、文件名、配置项等技术词。
+It reliably matches function names, class names, file names, configuration keys, and other technical identifiers.
 
-## RRF 融合
+## RRF fusion
 
-ContextWeaver 使用 Reciprocal Rank Fusion 融合多路召回结果，降低单一召回策略的偏差，让语义相似度和精确匹配共同影响最终排序。
+ContextWeaver uses Reciprocal Rank Fusion to combine recall results from multiple retrieval strategies. This reduces the bias of any single strategy and lets both semantic similarity and exact matching influence the final ranking.
 
-## Rerank 精排
+## Rerank
 
-召回后会进入 Rerank 阶段，对候选片段进行更细粒度排序，再交给上下文扩展与打包流程。
+After recall, candidates enter the rerank stage for finer-grained ordering before context expansion and packing.

@@ -1,67 +1,67 @@
-# 新增语言支持
+# Adding Language Support
 
-ContextWeaver 的语言支持分两层：
+ContextWeaver language support has two layers:
 
-1. AST 语义分片
-2. Import 解析与跨文件扩展
+1. AST semantic chunking
+2. Import resolution for cross-file expansion
 
-只做搜索时，第一层就足够；如果要让 E3 import 扩展跨文件工作，需要第二层。
+For search-only support, the first layer is enough. To make E3 import expansion work across files, add the second layer.
 
-## 步骤 1：添加 Tree-sitter 依赖
+## Step 1: Add Tree-sitter dependency
 
-在 `package.json` 中添加对应 grammar，例如：
+Add the grammar package to `package.json`, for example:
 
 ```bash
 pnpm add tree-sitter-xxx
 ```
 
-或使用 `@tree-sitter-grammars/*` 包。
+or use an `@tree-sitter-grammars/*` package.
 
-## 步骤 2：更新 LanguageSpec
+## Step 2: Update LanguageSpec
 
-修改：
+Modify:
 
 ```text
 src/chunking/LanguageSpec.ts
 ```
 
-需要定义：
+Define:
 
-- 文件扩展名
+- file extensions
 - language id
-- parser 加载方式
-- 关键 AST 节点类型
-- 可以作为 chunk 边界的节点
-- import 相关节点（如适用）
+- parser loading path
+- important AST node types
+- nodes that can become chunk boundaries
+- import-related nodes, if applicable
 
-## 步骤 3：验证 SemanticSplitter
+## Step 3: Validate SemanticSplitter
 
-检查：
+Check:
 
 ```text
 src/chunking/SemanticSplitter.ts
 ```
 
-确保新语言的关键节点会被识别为合理 chunk。
+Make sure key nodes in the new language are recognized as reasonable chunks.
 
-建议准备样例覆盖：
+Recommended examples:
 
-- 顶层函数
-- 类/方法
-- 接口/结构体
+- top-level function
+- class/method
+- interface/struct
 - import/export
-- 注释或装饰器
-- 多字节字符
+- comments or decorators
+- multi-byte characters
 
-## 步骤 4：添加 ImportResolver
+## Step 4: Add ImportResolver
 
-如果希望跨文件 E3 扩展支持新语言，新增：
+If you want cross-file E3 expansion, create:
 
 ```text
 src/search/resolvers/<Language>Resolver.ts
 ```
 
-实现接口：
+Implement:
 
 ```ts
 export interface ImportResolver {
@@ -71,53 +71,51 @@ export interface ImportResolver {
 }
 ```
 
-然后在：
+Then register it in:
 
 ```text
 src/search/resolvers/index.ts
 ```
 
-注册 resolver。
+## Step 5: Add tests
 
-## 步骤 5：补测试
-
-建议测试位置：
+Recommended test locations:
 
 ```text
 tests/chunking/newLanguages.test.ts
 tests/search/resolvers/<language>.test.ts
 ```
 
-至少覆盖：
+At minimum, cover:
 
-- 文件扩展名识别
-- AST chunk 边界
-- import 字符串提取
-- import 到文件路径解析
-- fallback 行为
+- extension detection
+- AST chunk boundaries
+- import string extraction
+- import path resolution
+- fallback behavior
 
-## 步骤 6：更新文档
+## Step 6: Update docs
 
-同步更新：
+Update:
 
 - `README.md`
 - `README.zh-CN.md`
-- 文档站语言支持页面或本页
+- website language support or this page
 
-## 常见问题
+## Common issues
 
-### Parser 初始化失败
+### Parser initialization fails
 
-通常是 grammar 包导出形式不一致。先查看该包的 ESM/CJS 导出，再调整 `LanguageSpec.ts` 中的加载方式。
+Grammar packages do not all export the same way. Inspect the package's ESM/CJS export shape and adjust loading in `LanguageSpec.ts`.
 
-### chunk 太碎
+### Chunks are too small
 
-减少可作为边界的 AST 节点类型，或在 `SemanticSplitter` 中调整合并策略。
+Reduce AST node types that become boundaries, or adjust merging logic in `SemanticSplitter`.
 
-### chunk 太大
+### Chunks are too large
 
-增加关键节点识别，或降低 fallback 分片大小。
+Recognize more key nodes, or reduce fallback chunk size.
 
-### import 解析命中太多
+### Import resolution matches too much
 
-在 resolver 的 `resolve()` 中优先当前目录、相对路径和语言约定扩展名，避免全局模糊匹配。
+In `resolve()`, prefer current directory, relative paths, and language-specific extensions before broad matching.

@@ -1,39 +1,39 @@
-# 扩展 MCP 工具
+# Extending MCP Tools
 
-ContextWeaver 的 MCP 工具位于：
+ContextWeaver MCP tools live under:
 
 ```text
 src/mcp/tools/
 ```
 
-MCP server 注册逻辑位于：
+MCP server registration lives in:
 
 ```text
 src/mcp/server.ts
 src/mcp/tools/index.ts
 ```
 
-## 设计原则
+## Design principles
 
-新增工具前先判断它属于哪一类：
+Before adding a tool, classify it:
 
-| 类型 | 例子 | 是否需要 Embedding |
-|------|------|-------------------|
-| 语义检索 | `codebase-retrieval` | 通常需要 |
-| 结构浏览 | `list-files`、符号定义、引用 | 不需要 |
-| 诊断统计 | `stats` | 不需要 |
+| Type | Examples | Needs Embedding? |
+|------|----------|------------------|
+| Semantic retrieval | `codebase-retrieval` | Usually yes |
+| Structure browsing | `list-files`, definitions, references | No |
+| Diagnostics/statistics | `stats` | No |
 
-能不调用外部 API 就不要调用。结构类工具应优先使用 SQLite 元数据和 FTS。
+Avoid external API calls when possible. Structure tools should prefer SQLite metadata and FTS.
 
-## 推荐文件结构
+## Recommended file structure
 
-新增工具建议创建独立文件：
+Create a dedicated file:
 
 ```text
 src/mcp/tools/myTool.ts
 ```
 
-典型结构：
+Typical shape:
 
 ```ts
 export interface MyToolInput {
@@ -47,53 +47,51 @@ export async function handleMyTool(input: MyToolInput) {
 }
 ```
 
-## 注册工具
+## Register the tool
 
-通常需要修改：
+Usually modify:
 
 ```text
 src/mcp/tools/index.ts
 src/mcp/server.ts
 ```
 
-确保：
+Ensure:
 
-- 工具名称稳定
-- description 明确说明使用场景
-- inputSchema 足够严格
-- 错误返回对 Agent 可理解
+- tool name is stable
+- description clearly explains when to use it
+- inputSchema is strict enough
+- errors are understandable to agents
 
-## 复用 shared 逻辑
+## Reuse shared logic
 
-共享路径、数据库初始化、响应格式等逻辑位于：
+Shared path, database initialization, and response formatting helpers live in:
 
 ```text
 src/mcp/tools/shared.ts
 ```
 
-新增工具应尽量复用，避免每个工具重复处理 repo path、project id 和数据库初始化。
+New tools should reuse this logic instead of duplicating repo path, project id, and database initialization code.
 
-## 添加 CLI 镜像
+## Add a CLI mirror
 
-如果工具对人类开发者也有价值，可以在：
+If the tool is useful for human developers, add a CLI mirror in:
 
 ```text
 src/cli/mirrorCommands.ts
 ```
 
-添加 CLI 镜像。
-
-已有例子：
+Existing examples:
 
 - `list-files [path]`
 - `definition <symbol>`
 - `references <symbol>`
 
-CLI 镜像应调用同一个 handler，避免 MCP 和 CLI 行为分叉。
+The CLI mirror should call the same handler so MCP and CLI behavior do not diverge.
 
-## 测试
+## Tests
 
-建议新增：
+Recommended tests:
 
 ```text
 tests/mcp/myTool.test.ts
@@ -101,20 +99,20 @@ tests/mcp/toolRegistry.test.ts
 tests/cli/mirrorCommands.test.ts
 ```
 
-测试重点：
+Test focus:
 
-- input schema 与 handler 参数一致
-- 错误输入返回可理解错误
-- handler 不依赖真实 MCP server 即可测试
-- CLI 镜像正确解析参数
+- input schema matches handler parameters
+- invalid input returns understandable errors
+- handler can be tested without running a real MCP server
+- CLI mirror parses parameters correctly
 
-## 工具描述写法
+## Writing tool descriptions
 
-MCP 工具描述会直接影响 Agent 是否正确使用。建议包括：
+MCP tool descriptions strongly influence whether agents choose the right tool. Include:
 
-- 什么时候使用
-- 什么时候不要使用
-- 成本说明
-- 与其他工具的区别
+- when to use it
+- when not to use it
+- cost information
+- how it differs from related tools
 
-例如结构浏览工具应明确写出“zero embedding API cost”。
+For structure browsing tools, explicitly mention zero embedding API cost.

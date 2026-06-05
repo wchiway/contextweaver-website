@@ -1,6 +1,6 @@
-# 配置项
+# Configuration
 
-ContextWeaver 使用 `~/.contextweaver/.env` 管理运行配置。
+ContextWeaver stores runtime configuration in `~/.contextweaver/.env`.
 
 ## Embedding
 
@@ -21,7 +21,7 @@ RERANK_MODEL=BAAI/bge-reranker-v2-m3
 RERANK_TOP_N=20
 ```
 
-## 搜索参数
+## Search parameters
 
 ```bash
 CW_SEARCH_WVEC=0.6
@@ -33,10 +33,10 @@ CW_SEARCH_SMART_MAX_K=8
 CW_SEARCH_IMPORT_FILES_PER_SEED=3
 ```
 
-## 忽略模式
+## Ignore patterns
 
 ```bash
 IGNORE_PATTERNS=.venv,node_modules
 ```
 
-忽略模式使用逗号分隔，适合排除依赖目录、虚拟环境、构建产物和临时文件。
+Ignore patterns are comma-separated. They are useful for excluding dependency directories, virtual environments, build outputs, and temporary files.

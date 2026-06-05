@@ -1,6 +1,6 @@
-# 数据存储模型
+# Storage Model
 
-ContextWeaver 使用 SQLite + LanceDB 的双存储架构。
+ContextWeaver uses a dual-store architecture: SQLite + LanceDB.
 
 ```text
 ~/.contextweaver/<projectId>/
@@ -10,89 +10,89 @@ ContextWeaver 使用 SQLite + LanceDB 的双存储架构。
 
 ## SQLite
 
-SQLite 是元数据、正文和全文索引的中心。
+SQLite is the center for metadata, source content, and full-text search.
 
-| 表 | 作用 |
-|----|------|
-| `files` | 文件元数据与完整正文，`content` 是正文唯一来源 |
-| `files_fts` | 文件级 FTS5 索引 |
-| `chunks_fts` | chunk 级 FTS5 索引 |
-| `metadata` | schema version、embedding dimensions、迁移状态、lock 等 |
-| `pending_marks` | outbox，用于 mark 阶段失败后的启动重放 |
-| `stats` | 索引、搜索、健康统计累计值 |
+| Table | Purpose |
+|-------|---------|
+| `files` | File metadata and full content; `content` is the single source of truth |
+| `files_fts` | File-level FTS5 index |
+| `chunks_fts` | Chunk-level FTS5 index |
+| `metadata` | Schema version, embedding dimensions, migration state, lock, and related metadata |
+| `pending_marks` | Outbox for replaying failed mark stages |
+| `stats` | Accumulated index, search, and health metrics |
 
 ## LanceDB
 
-LanceDB 的 `chunks` 表只保存：
+The LanceDB `chunks` table stores only:
 
-- 向量
-- 文件路径
+- vector
+- file path
 - chunk index
 - hash
-- start/end offset
+- start/end offsets
 - breadcrumb
-- language 等定位元数据
+- language and locating metadata
 
-v1.4.0 起，LanceDB 不再保存 `display_code` 或 `vector_text`。这样可以降低索引体积，并避免正文在多处出现不一致。
+Since v1.4.0, LanceDB no longer stores `display_code` or `vector_text`. This reduces index size and avoids duplicated source content.
 
-## 正文唯一源
+## Single source of truth
 
-关键不变量：
+Critical invariant:
 
 ```text
-正文唯一来源 = SQLite files.content
+source content = SQLite files.content
 ```
 
-搜索结果展示时，`ChunkContentLoader` 使用 `(path, start_index, end_index)` 从 `files.content` 切片。
+When displaying search results, `ChunkContentLoader` slices `files.content` using `(path, start_index, end_index)`.
 
-不要使用 `raw_start/raw_end` 做展示切片，因为它可能包含 gap-aware 合并时的前置间隙。
+Do not use `raw_start/raw_end` for display slicing because those offsets may include leading gaps from gap-aware merging.
 
-## 偏移域
+## Offset domain
 
-所有 LanceDB offset 字段都使用 UTF-16 字符域。
+All LanceDB offset fields use the UTF-16 character domain.
 
-原因：JavaScript 字符串切片按 UTF-16 code units 工作。如果把 UTF-8 byte offset 写入元数据，多字节字符会导致切片错位。
+JavaScript string slicing works on UTF-16 code units. If UTF-8 byte offsets are written into metadata, multi-byte characters will cause incorrect slicing.
 
-相关模块：
+Related modules:
 
 - `src/chunking/SourceAdapter.ts`
 - `src/chunking/SemanticSplitter.ts`
 - `tests/chunking/SourceAdapter.test.ts`
 - `tests/search/ChunkContentLoader.test.ts`
 
-## 迁移状态机
+## Migration state machine
 
-LanceDB display_code 移除迁移使用三态：
+The LanceDB display-code removal migration has three states:
 
-| 状态 | 含义 |
-|------|------|
-| `pending` | 需要迁移或迁移未完成 |
-| `done` | 迁移完成 |
-| `aborted` | 抽样校验失败或迁移异常，Indexer 拒绝写入 |
+| State | Meaning |
+|-------|---------|
+| `pending` | Migration is needed or incomplete |
+| `done` | Migration completed |
+| `aborted` | Sample validation or migration failed; Indexer refuses writes |
 
-解除 `aborted`：
+To recover from `aborted`:
 
 ```bash
 contextweaver migrate --reset
 ```
 
-## 跨库一致性
+## Cross-store consistency
 
-写入顺序：
+Write order:
 
 ```text
 LanceDB → FTS + outbox → SQLite mark + clear outbox
 ```
 
-这个顺序让系统在崩溃或部分失败后可以恢复：
+This lets the system recover after crashes or partial failures:
 
-- FTS 失败时可删除新写入的 LanceDB chunks
-- mark 失败时可通过 `pending_marks` 重放
-- hash 不匹配时下次扫描会重新索引
+- FTS failure can delete newly written LanceDB chunks
+- mark failure can be replayed through `pending_marks`
+- hash mismatches trigger re-indexing on the next scan
 
-## 二开建议
+## Development guidance
 
-- 增加字段时先判断它属于正文、定位元数据、统计还是迁移状态
-- 正文类字段优先放 SQLite，不要放 LanceDB
-- 修改 schema 时同步更新迁移测试
-- 涉及跨库写入时必须设计失败补偿路径
+- Decide whether a new field belongs to content, locating metadata, statistics, or migration state
+- Put source-content fields in SQLite, not LanceDB
+- Update migration tests when schema changes
+- Design failure compensation for any cross-store write change

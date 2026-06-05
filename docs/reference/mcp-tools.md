@@ -1,28 +1,28 @@
-# MCP 工具参考
+# MCP Tools Reference
 
-ContextWeaver 暴露 5 个 MCP 工具，设计原则是“语义检索为主，结构浏览为辅”。
+ContextWeaver exposes 5 MCP tools. The design principle is: semantic retrieval first, structure browsing second.
 
-| 工具 | 用途 | Embedding 成本 |
-|------|------|---------------|
-| `codebase-retrieval` | 混合语义 + 精确匹配检索 | 有 |
-| `list-files` | 列出已索引文件结构 | 无 |
-| `find-references` | 启发式查找符号引用 | 无 |
-| `get-symbol-definition` | 启发式查找符号定义 | 无 |
-| `stats` | 输出索引、搜索、健康统计 | 无 |
+| Tool | Purpose | Embedding cost |
+|------|---------|----------------|
+| `codebase-retrieval` | Hybrid semantic + exact-match retrieval | Yes |
+| `list-files` | List indexed file structure | No |
+| `find-references` | Heuristic symbol reference lookup | No |
+| `get-symbol-definition` | Heuristic symbol definition lookup | No |
+| `stats` | Index, search, and health statistics | No |
 
 ## codebase-retrieval
 
-主力检索工具。适合回答“某个功能如何实现”“某条链路在哪里”等问题。
+The primary retrieval tool. Use it for questions like "how is this feature implemented?" or "where is this flow handled?".
 
-参数：
+Parameters:
 
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| `repo_path` | string | 是 | 代码库根目录绝对路径 |
-| `information_request` | string | 是 | 自然语言语义目标 |
-| `technical_terms` | string[] | 否 | 必须出现或需要强调的精确术语 |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `repo_path` | string | Yes | Absolute path to the repository root |
+| `information_request` | string | Yes | Natural-language semantic goal |
+| `technical_terms` | string[] | No | Exact symbols or terms to emphasize |
 
-推荐用法：
+Recommended usage:
 
 ```json
 {
@@ -34,18 +34,18 @@ ContextWeaver 暴露 5 个 MCP 工具，设计原则是“语义检索为主，�
 
 ## list-files
 
-用于快速了解已索引文件结构，不调用 Embedding API。
+Quickly inspect indexed file structure without calling the Embedding API.
 
-参数：
+Parameters:
 
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| `repo_path` | string | 是 | 代码库根目录绝对路径 |
-| `glob` | string | 否 | 路径 glob 过滤 |
-| `language` | string | 否 | 语言过滤 |
-| `max_results` | number | 否 | 最大返回数量 |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `repo_path` | string | Yes | Absolute path to the repository root |
+| `glob` | string | No | Path glob filter |
+| `language` | string | No | Language filter |
+| `max_results` | number | No | Maximum number of results |
 
-CLI 镜像：
+CLI mirror:
 
 ```bash
 contextweaver list-files --glob "src/**/*.ts" --language typescript --max-results 100
@@ -53,18 +53,18 @@ contextweaver list-files --glob "src/**/*.ts" --language typescript --max-result
 
 ## find-references
 
-基于已索引 chunk 的启发式文本引用查找，不是编译器级精确导航。
+Find heuristic text references to a symbol over indexed chunks. This is not compiler-accurate navigation.
 
-参数：
+Parameters:
 
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| `repo_path` | string | 是 | 代码库根目录绝对路径 |
-| `symbol` | string | 是 | 精确符号名 |
-| `exclude_definition` | boolean | 否 | 排除定义位置 |
-| `max_results` | number | 否 | 最大返回数量，默认 50 |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `repo_path` | string | Yes | Absolute path to the repository root |
+| `symbol` | string | Yes | Exact symbol name |
+| `exclude_definition` | boolean | No | Exclude likely definition chunks |
+| `max_results` | number | No | Maximum results, default 50 |
 
-CLI 镜像：
+CLI mirror:
 
 ```bash
 contextweaver references SearchService --exclude-definition
@@ -72,18 +72,18 @@ contextweaver references SearchService --exclude-definition
 
 ## get-symbol-definition
 
-查找可能的符号定义块。适合快速定位类、函数、方法定义。
+Find likely definition blocks for classes, functions, methods, and similar symbols.
 
-参数：
+Parameters:
 
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| `repo_path` | string | 是 | 代码库根目录绝对路径 |
-| `symbol` | string | 是 | 精确符号名 |
-| `hint_path` | string | 否 | 用于同名定义消歧的路径提示 |
-| `max_results` | number | 否 | 最大返回数量，默认 3 |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `repo_path` | string | Yes | Absolute path to the repository root |
+| `symbol` | string | Yes | Exact symbol name |
+| `hint_path` | string | No | Preferred path to disambiguate same-name definitions |
+| `max_results` | number | No | Maximum results, default 3 |
 
-CLI 镜像：
+CLI mirror:
 
 ```bash
 contextweaver definition SearchService --hint-path src/search
@@ -91,28 +91,28 @@ contextweaver definition SearchService --hint-path src/search
 
 ## stats
 
-输出统计与健康信息，包括：
+Returns index, search, and health statistics, including:
 
-- 索引过程统计
-- 搜索行为与缓存命中率
-- 健康与一致性诊断
-- 迁移状态
-- `pending_marks` 积压
-- LanceDB 行数与 embedding 维度
+- indexing counters
+- search behavior and cache hit rate
+- health and consistency diagnostics
+- migration state
+- `pending_marks` backlog
+- LanceDB row count and embedding dimensions
 
-CLI 镜像：
+CLI mirror:
 
 ```bash
 contextweaver stats
 contextweaver stats --json
 ```
 
-## 工具设计建议
+## Tool design guidance
 
-二开新增 MCP 工具时，建议优先判断它属于：
+When adding a new MCP tool, first classify it as:
 
-1. **语义检索类**：可能需要 Embedding/Rerank
-2. **结构浏览类**：应尽量零 API 成本
-3. **诊断统计类**：应尽量可 JSON 输出，便于脚本消费
+1. **Semantic retrieval**: may require Embedding/Rerank
+2. **Structure browsing**: should usually be zero API cost
+3. **Diagnostics/statistics**: should support machine-readable output when useful
 
-新增工具的实现步骤见 [扩展 MCP 工具](/development/extending-mcp)。
+See [Extending MCP Tools](/development/extending-mcp) for implementation steps.

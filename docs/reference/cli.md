@@ -1,40 +1,40 @@
-# CLI 命令
+# CLI Commands
 
-## 初始化
+## Initialize
 
 ```bash
 contextweaver init
 cw init
 ```
 
-创建或更新 `~/.contextweaver/.env` 配置文件。
+Create or update the `~/.contextweaver/.env` configuration file.
 
-## 索引
+## Index
 
 ```bash
 contextweaver index [path]
 contextweaver index --force
 ```
 
-索引代码库，生成 SQLite 元数据、FTS 索引与 LanceDB 向量索引。
+Index a codebase and generate SQLite metadata, FTS indexes, and LanceDB vector indexes.
 
-## 搜索
+## Search
 
 ```bash
-contextweaver search --information-request "你的问题"
-cw search --information-request "你的问题" --technical-terms "TermA,TermB"
+contextweaver search --information-request "your question"
+cw search --information-request "your question" --technical-terms "TermA,TermB"
 ```
 
-执行语义搜索，并返回经过上下文扩展与 token 打包后的结果。
+Run semantic search and return results after context expansion and token-aware packing.
 
-## 监听
+## Watch
 
 ```bash
 contextweaver watch
 contextweaver watch /path/to/project --debounce 800
 ```
 
-监听文件变化并自动执行增量索引。
+Watch file changes and automatically run incremental indexing.
 
 ## MCP Server
 
@@ -42,9 +42,9 @@ contextweaver watch /path/to/project --debounce 800
 contextweaver mcp
 ```
 
-启动 MCP 服务端。
+Start the MCP server.
 
-## 结构与符号查询
+## Structure and symbol lookup
 
 ```bash
 contextweaver list-files --glob "src/**/*.ts" --language typescript --max-results 100
@@ -52,22 +52,22 @@ contextweaver definition SearchService --hint-path src/search
 contextweaver references handleStats --exclude-definition
 ```
 
-这些命令是 MCP 工具的 CLI 镜像，不需要 Embedding API 调用。
+These commands mirror MCP tools and do not require embedding API calls.
 
-## 统计
+## Stats
 
 ```bash
 contextweaver stats
 contextweaver stats --json
 ```
 
-查看索引状态、搜索指标与一致性诊断。
+Inspect index status, search metrics, and consistency diagnostics.
 
-## 迁移
+## Migration
 
 ```bash
 contextweaver migrate
 contextweaver migrate --reset
 ```
 
-查看或重置 LanceDB 迁移状态。
+Inspect or reset LanceDB migration state.

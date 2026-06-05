@@ -1,8 +1,8 @@
-# AST 语义分片
+# AST Semantic Chunking
 
-语义分片决定了 ContextWeaver 能否把代码切成适合检索和展示的上下文单位。
+Semantic chunking determines whether ContextWeaver can split code into useful retrieval and display units.
 
-核心代码位于：
+Core files:
 
 - `src/chunking/SemanticSplitter.ts`
 - `src/chunking/LanguageSpec.ts`
@@ -10,83 +10,83 @@
 - `src/chunking/SourceAdapter.ts`
 - `src/chunking/types.ts`
 
-## 分片目标
+## Chunking goals
 
-ContextWeaver 希望 chunk 尽量对应真实语义边界：
+ContextWeaver tries to align chunks with real semantic boundaries:
 
-- 函数
-- 方法
-- 类
-- 接口
-- 结构体
-- 模块级声明
-- 重要的相邻代码片段
+- functions
+- methods
+- classes
+- interfaces
+- structs
+- module-level declarations
+- important adjacent code snippets
 
-这样做有两个好处：
+This has two benefits:
 
-1. 向量文本更像“一个完整概念”，召回更稳定。
-2. 展示文本不会把函数或类型定义切断，LLM 更容易理解。
+1. Vector text represents a complete concept, improving recall stability.
+2. Display text does not cut functions or type definitions in half, making it easier for LLMs to understand.
 
-## Tree-sitter 路径
+## Tree-sitter path
 
-支持 AST 的语言会走 Tree-sitter：
+Languages with AST support go through Tree-sitter:
 
 ```text
 LanguageSpec → ParserPool → Tree-sitter AST → SemanticSplitter → Chunk metadata
 ```
 
-`LanguageSpec.ts` 定义语言扩展名、AST 节点类型、import 相关信息等语言规范。
+`LanguageSpec.ts` defines language extensions, AST node types, import metadata, and language-specific rules.
 
-`ParserPool.ts` 复用 Tree-sitter parser，避免重复创建解析器。
+`ParserPool.ts` reuses Tree-sitter parsers to avoid repeatedly constructing them.
 
-## Fallback 行分片
+## Fallback line chunking
 
-如果语言没有 AST 支持，或者解析失败，会退回行分片。Fallback 分片仍然可以被索引和搜索，只是语义边界不如 AST 分片准确。
+If a language has no AST support or parsing fails, ContextWeaver falls back to line-based chunking. Fallback chunks can still be indexed and searched, but semantic boundaries are less precise.
 
-## Dual-Text 策略
+## Dual-text strategy
 
-分片过程中会区分两类文本：
+Chunking distinguishes two text forms:
 
-| 文本 | 用途 |
-|------|------|
-| `displayCode` | 展示给用户/LLM 的代码片段 |
-| `vectorText` | 送入 Embedding 的文本，可能包含 breadcrumb |
+| Text | Purpose |
+|------|---------|
+| `displayCode` | Code shown to users and LLMs |
+| `vectorText` | Text sent to embeddings, often with breadcrumbs |
 
-v1.4.0 起，`displayCode/vectorText` 不再存入 LanceDB。正文回查统一通过 SQLite `files.content` 完成。
+Since v1.4.0, `displayCode/vectorText` are no longer stored in LanceDB. Source text is loaded from SQLite `files.content`.
 
-## Breadcrumb 注入
+## Breadcrumb injection
 
-Breadcrumb 是 chunk 的层级路径，例如：
+A breadcrumb is the structural path of a chunk, for example:
 
 ```text
 SearchService > buildContextPack
 ```
 
-它会进入向量文本，帮助检索模型理解 chunk 所处结构。
+It is included in vector text so the embedding model understands where the chunk lives.
 
-## Gap-Aware 合并
+## Gap-aware merging
 
-当相邻语义节点之间存在少量 gap，例如注释、装饰器或类型声明，分片器会尽量保留上下文完整性。
+When nearby semantic nodes have small gaps, such as comments, decorators, or type declarations, the splitter tries to preserve context completeness.
 
-这也是为什么展示切片必须使用 `start_index/end_index`，而不要直接使用 `raw_start/raw_end`。
+This is why display slicing must use `start_index/end_index`, not `raw_start/raw_end`.
 
-## UTF-16 偏移归一
+## UTF-16 offset normalization
 
-JavaScript 字符串以 UTF-16 code units 切片。Tree-sitter 可能提供 byte offset，因此写入 metadata 前必须通过 `SourceAdapter.toCharOffset` 归一。
+JavaScript strings are sliced by UTF-16 code units. Tree-sitter may provide byte offsets, so metadata offsets must be normalized through `SourceAdapter.toCharOffset` before writing.
 
-相关测试：
+Related tests:
 
 - `tests/chunking/SourceAdapter.test.ts`
 - `tests/search/ChunkContentLoader.test.ts`
 
-## 新增语言支持的入口
+## Adding language support
 
-如果要新增语言，通常需要：
+To add a language, usually:
 
-1. 添加 Tree-sitter grammar 依赖
-2. 更新 `LanguageSpec.ts`
-3. 确认 `SemanticSplitter.ts` 能识别关键 AST 节点
-4. 如需跨文件扩展，添加 `search/resolvers/<Language>Resolver.ts`
-5. 增加 chunking 与 resolver 测试
+1. Add the Tree-sitter grammar dependency
+2. Update `LanguageSpec.ts`
+3. Ensure `SemanticSplitter.ts` recognizes key AST nodes
+4. Add `search/resolvers/<Language>Resolver.ts` if cross-file import expansion is needed
+5. Add chunking and resolver tests
 
-详细步骤见 [新增语言支持](/development/adding-language)。
+See [Adding Language Support](/development/adding-language) for detailed steps.

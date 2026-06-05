@@ -1,27 +1,27 @@
-# 架构总览
+# Architecture Overview
 
-ContextWeaver 的架构可以分为四层：接口层、索引层、存储层和搜索层。
+ContextWeaver is organized into four layers: interface, indexing, storage, and search.
 
 ```mermaid
 flowchart TB
-  subgraph Interface[接口层]
+  subgraph Interface[Interface Layer]
     CLI[CLI]
     MCP[MCP Server]
   end
 
-  subgraph Indexing[索引层]
+  subgraph Indexing[Indexing Layer]
     Crawler[Crawler]
     Processor[Processor]
     Splitter[SemanticSplitter]
     Indexer[Indexer]
   end
 
-  subgraph Storage[存储层]
+  subgraph Storage[Storage Layer]
     SQLite[(SQLite + FTS5)]
     LanceDB[(LanceDB)]
   end
 
-  subgraph Search[搜索层]
+  subgraph Search[Search Layer]
     QueryCache[QueryCache]
     SearchService[SearchService]
     GraphExpander[GraphExpander]
@@ -43,53 +43,53 @@ flowchart TB
   ContextPacker --> SQLite
 ```
 
-## 接口层
+## Interface layer
 
-| 文件 | 职责 |
-|------|------|
-| `src/index.ts` | CLI 入口，注册 `init/index/watch/search/mcp/migrate/stats` 等命令 |
-| `src/mcp/server.ts` | MCP 服务端，注册工具并处理 MCP 协议调用 |
-| `src/cli/mirrorCommands.ts` | 将部分 MCP 工具镜像为 CLI 命令 |
+| File | Responsibility |
+|------|----------------|
+| `src/index.ts` | CLI entrypoint; registers `init/index/watch/search/mcp/migrate/stats` commands |
+| `src/mcp/server.ts` | MCP server; registers tools and handles protocol calls |
+| `src/cli/mirrorCommands.ts` | Mirrors selected MCP tools as CLI commands |
 
-## 索引层
+## Indexing layer
 
-索引层负责从文件系统读取源码，过滤无价值文件，计算 hash，分片并写入索引。
+The indexing layer reads source files, filters low-value files, computes hashes, chunks code, and writes indexes.
 
-| 文件 | 职责 |
-|------|------|
-| `src/scanner/crawler.ts` | 基于 `fdir` 遍历文件系统 |
-| `src/scanner/filter.ts` | 应用默认忽略规则与 `IGNORE_PATTERNS` |
-| `src/scanner/processor.ts` | 读取文件、检测编码、计算 hash |
-| `src/chunking/SemanticSplitter.ts` | AST 语义分片与 fallback 行分片 |
-| `src/indexer/index.ts` | 批量 embedding、写 LanceDB、写 FTS、更新 SQLite mark |
+| File | Responsibility |
+|------|----------------|
+| `src/scanner/crawler.ts` | Traverses the filesystem with `fdir` |
+| `src/scanner/filter.ts` | Applies default ignore rules and `IGNORE_PATTERNS` |
+| `src/scanner/processor.ts` | Reads files, detects encoding, and computes hashes |
+| `src/chunking/SemanticSplitter.ts` | AST semantic chunking and fallback line chunking |
+| `src/indexer/index.ts` | Batch embedding, LanceDB writes, FTS writes, and SQLite marks |
 
-## 存储层
+## Storage layer
 
-ContextWeaver 使用 SQLite 和 LanceDB 组成双存储：
+ContextWeaver uses two storage systems:
 
-- SQLite：文件元数据、完整正文、FTS5、统计、迁移状态、outbox
-- LanceDB：向量与定位元数据
+- SQLite: file metadata, full content, FTS5, statistics, migration state, and outbox
+- LanceDB: vectors and locating metadata
 
-v1.4.0 起，正文只存在 SQLite 的 `files.content`，LanceDB 不再保存 `display_code/vector_text`。
+Since v1.4.0, source content only lives in SQLite `files.content`; LanceDB no longer stores `display_code` or `vector_text`.
 
-## 搜索层
+## Search layer
 
-搜索层负责从用户查询构建最终上下文包。
+The search layer builds final context packs from user queries.
 
-| 文件 | 职责 |
-|------|------|
-| `src/search/SearchService.ts` | 混合检索、RRF、Rerank、Smart TopK、统计记录 |
-| `src/search/QueryCache.ts` | per-project LRU 查询缓存 |
-| `src/search/GraphExpander.ts` | E1/E2/E3 上下文扩展 |
-| `src/search/ContextPacker.ts` | 合并片段并控制 token 预算 |
-| `src/search/ChunkContentLoader.ts` | 从 `files.content` 批量切片 |
-| `src/search/fts.ts` | 文件级与 chunk 级 FTS 搜索 |
+| File | Responsibility |
+|------|----------------|
+| `src/search/SearchService.ts` | Hybrid retrieval, RRF, rerank, Smart TopK, and stats recording |
+| `src/search/QueryCache.ts` | Per-project LRU query cache |
+| `src/search/GraphExpander.ts` | E1/E2/E3 context expansion |
+| `src/search/ContextPacker.ts` | Segment merging and token-budget control |
+| `src/search/ChunkContentLoader.ts` | Slices content from `files.content` |
+| `src/search/fts.ts` | File-level and chunk-level FTS search |
 
-## 二开时的判断原则
+## Where to make changes
 
-- 修改“如何扫描文件”：优先看 `scanner/`
-- 修改“如何切 chunk”：优先看 `chunking/`
-- 修改“如何写索引”：优先看 `indexer/`、`db/`、`vectorStore/`
-- 修改“如何搜”：优先看 `search/SearchService.ts`
-- 修改“如何扩展上下文”：优先看 `GraphExpander.ts` 和 `resolvers/`
-- 修改“暴露给 Agent 的工具”：优先看 `mcp/tools/`
+- Change file discovery: `scanner/`
+- Change chunking: `chunking/`
+- Change index writes: `indexer/`, `db/`, `vectorStore/`
+- Change retrieval: `search/SearchService.ts`
+- Change expansion: `GraphExpander.ts` and `resolvers/`
+- Change tools exposed to agents: `mcp/tools/`
