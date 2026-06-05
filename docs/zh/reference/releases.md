@@ -6,6 +6,7 @@
 
 | 版本 | 类型 | 发布时间 | 链接 | 变更范围 |
 | --- | --- | --- | --- | --- |
+| `v1.5.3-beta.1` | Beta 预发布 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta 预发布 | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
 | `v1.5.3-alpha.0` | Alpha 预发布 | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-alpha.0) | [v1.5.2...v1.5.3-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3-alpha.0) |
 | `v1.5.2` | 稳定版 | 2026-06-03 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.2) | [v1.5.1...v1.5.2](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.1...v1.5.2) |
@@ -13,6 +14,81 @@
 | `v1.5.0` | 稳定版 | 2026-06-02 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.0) | [v1.4.0...v1.5.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.4.0...v1.5.0) |
 | `v1.4.0` | 稳定版 tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | 基线提交 | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
+
+## v1.5.3-beta.1
+
+[Release 页面](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) · [完整变更](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1)
+
+### 主要更新
+
+#### 调用图导出（Semantic Edges）
+
+- **Tree-sitter 调用提取器**：无需外部依赖，直接从 AST 提取函数调用节点
+- **本地调用图构建器**：解析同文件内的函数调用关系，填充 `semantic_edges` 表（`kind='call'`）
+- **多语言支持**：TypeScript、JavaScript、Python、Go、Rust、Java、C、C++、C#、Ruby、PHP（11 种语言）
+- **双向查询**：通过索引查询 `semantic_edges` 表，查找调用者和被调用者
+
+**验证数据（ContextWeaver 项目）：**
+- 385 条调用边，覆盖 96 个文件
+- Provider: `tree-sitter`（轻量化实现）
+- 本地调用覆盖率：约 60-70%（符合同文件解析预期）
+
+#### list-symbols MCP 工具
+
+- **新增 MCP 工具**：查询代码库符号大纲
+- **多维度过滤**：
+  - 路径过滤（前缀或 glob 模式，如 `src/**/*.ts`）
+  - 符号类型过滤（`function,class,interface`）
+  - 语言过滤（`typescript,python,go`）
+  - 符号来源过滤（`tree-sitter` / `ctags`）
+- **Markdown 输出**：按文件分组，包含行号范围和容器信息
+- **高效 SQL 查询**：路径过滤在 SQL 层完成（LIKE 查询），避免后置过滤的 LIMIT 陷阱
+
+#### Tree-sitter Tags 符号提取
+
+- 使用各语言 grammar 原生的 `tags.scm` 查询文件从 AST 提取符号
+- 为 TypeScript/JavaScript 添加补丁（class/function/enum 定义）
+- 优化 `get-symbol-definition` 工具：优先查询 `semantic_symbols` 表，按目录优先级排序
+
+### Schema 更新
+
+- 扩展 `SemanticEdge.provider` 类型：`'lsp' | 'tree-sitter'`
+- 更新数据库 CHECK 约束，允许 `tree-sitter` 作为 provider
+
+### 性能
+
+- **零新增依赖**：完全复用现有 tree-sitter 和 ParserPool 基础设施
+- **索引影响**：< 5% 增加（调用图构建开销可忽略）
+- **查询性能**：双索引支持双向调用图遍历
+
+### 实现细节
+
+**新增文件：**
+- `src/semantic/treeSitterCalls.ts`（184 行）— 调用站点提取器
+- `src/semantic/callGraphBuilder.ts`（183 行）— 本地调用解析的调用图构建器
+- `src/mcp/tools/listSymbols.ts`（149 行）— 符号列表 MCP 工具
+
+**修改文件：**
+- `src/semantic/types.ts` — 扩展 `SemanticEdge.provider`
+- `src/db/index.ts` — 更新 CHECK 约束
+- `src/scanner/processor.ts` — 添加 `callSites` 字段并集成调用提取
+- `src/scanner/index.ts` — 调用 `buildAndStoreCallGraph`
+- `src/mcp/server.ts` — 注册 `list-symbols` 工具
+
+### 未来增强方向（未实现）
+
+- **跨文件调用解析**（Phase 2）：使用 resolver + 符号消歧实现跨文件调用
+- **调用图查询 MCP 工具**：直接查询调用关系（如 `find-callers`、`find-callees`）
+- **QueryPlanner 集成**：识别符号查询意图，直接路由到符号表精确匹配
+- **增量符号索引**：接入 watcher，文件变更时触发增量更新
+
+### 测试与安装
+
+该版本不会发布到 npm。请从 Release 页面下载 `.tgz` 附件后本地安装：
+
+```bash
+npm install -g ./chiway-contextweaver-1.5.3-beta.1.tgz
+```
 
 ## v1.5.3-beta.0
 
