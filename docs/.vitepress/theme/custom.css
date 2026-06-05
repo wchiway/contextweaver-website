@@ -1,0 +1,186 @@
+/**
+ * Custom styles for ContextWeaver documentation
+ */
+
+/* Hero section enhancements */
+.VPHero {
+  padding-top: 80px !important;
+  padding-bottom: 80px !important;
+}
+
+.VPHero .name {
+  font-size: 64px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(120deg, var(--vp-c-brand-1) 30%, var(--vp-c-brand-2)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.VPHero .text {
+  font-size: 32px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  margin-top: 16px !important;
+}
+
+/* Logo and tagline side-by-side layout */
+.VPHero .tagline {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 48px !important;
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+  max-width: 1000px !important;
+  margin: 24px auto 0 !important;
+  opacity: 0.9 !important;
+  text-align: left !important;
+}
+
+.VPHero .tagline::before {
+  content: '';
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  margin-right: 16px;
+  background-image: url('/logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 8px 24px rgba(124, 58, 237, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.VPHero .actions {
+  margin-top: 40px !important;
+  gap: 16px !important;
+}
+
+.VPHero .action {
+  padding: 14px 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.VPHero .action.brand {
+  box-shadow: 0 4px 12px rgba(var(--vp-c-brand-rgb), 0.3) !important;
+}
+
+.VPHero .action.brand:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(var(--vp-c-brand-rgb), 0.4) !important;
+}
+
+.VPHero .action.alt:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* Features section */
+.VPFeatures {
+  padding-top: 60px !important;
+  padding-bottom: 60px !important;
+}
+
+.VPFeature {
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: 12px !important;
+  padding: 28px !important;
+  transition: all 0.3s ease !important;
+  background: var(--vp-c-bg-soft) !important;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .VPFeature:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.VPFeature .title {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  color: var(--vp-c-brand-1) !important;
+}
+
+.VPFeature .details {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  color: var(--vp-c-text-2) !important;
+}
+
+/* Home content section */
+.vp-doc h2 {
+  margin-top: 48px !important;
+  margin-bottom: 24px !important;
+  padding-top: 24px !important;
+  border-top: 1px solid var(--vp-c-divider) !important;
+  font-size: 28px !important;
+}
+
+.vp-doc h2:first-of-type {
+  margin-top: 60px !important;
+}
+
+.vp-doc p {
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+}
+
+.vp-doc ul {
+  margin-top: 16px !important;
+}
+
+.vp-doc ul li {
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .VPHero .tagline {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 24px !important;
+  }
+
+  .VPHero .tagline::before {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .VPHero .name {
+    font-size: 48px !important;
+  }
+
+  .VPHero .text {
+    font-size: 24px !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 16px !important;
+  }
+
+  .VPHero .tagline::before {
+    width: 120px;
+    height: 120px;
+  }
+}

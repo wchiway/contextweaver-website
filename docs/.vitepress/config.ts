@@ -1,12 +1,17 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 const socialLinks = [
   { icon: 'github', link: 'https://github.com/wchiway/contextweaver-mcp' }
 ] as const
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   cleanUrls: true,
   metaChunk: true,
+  mermaid: {},
+  mermaidPlugin: {
+    class: 'mermaid'
+  },
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]],
   locales: {
     root: {
@@ -159,4 +164,4 @@ export default defineConfig({
       }
     }
   }
-})
+}))

@@ -4,24 +4,34 @@ layout: home
 hero:
   name: ContextWeaver
   text: Weave codebase context for AI agents
-  tagline: Semantic Code Retrieval for AI Agents — Hybrid Search · Graph Expansion · Token-Aware Packing
+  tagline: Semantic code retrieval engine designed for AI coding agents — delivering precise, context-rich code snippets through hybrid search, graph expansion, and intelligent packing
   actions:
     - theme: brand
-      text: Get Started
+      text: Get Started →
       link: /guide/getting-started
     - theme: alt
-      text: CLI Reference
-      link: /reference/cli
+      text: View on GitHub
+      link: https://github.com/wchiway/contextweaver-mcp
 
 features:
-  - title: Hybrid Search
-    details: Combine vector retrieval and full-text search with RRF fusion for more stable code search results.
-  - title: AST-Aware Chunking
-    details: Use Tree-sitter to understand code structure and keep functions, classes, and modules as meaningful context units.
-  - title: Graph Expansion
-    details: Expand from matched chunks to neighboring code, breadcrumbs, and import dependencies to avoid isolated snippets.
-  - title: Token-Aware Packing
-    details: Merge, rank, and trim snippets within a token budget so LLMs receive usable context.
+  - icon: 🔍
+    title: Hybrid Search
+    details: Combine vector similarity and full-text search with RRF fusion algorithm, delivering more accurate and stable code retrieval results.
+  - icon: 🌳
+    title: AST-Aware Chunking
+    details: Leverage Tree-sitter to parse code structure, maintaining semantic integrity by chunking at function, class, and module boundaries.
+  - icon: 🕸️
+    title: Graph Expansion
+    details: Automatically expand context from matched chunks to neighboring code, breadcrumbs, and import dependencies for complete understanding.
+  - icon: 📦
+    title: Token-Aware Packing
+    details: Intelligently merge, rank, and trim code snippets within your token budget, ensuring LLMs receive optimal context without overflow.
+  - icon: 🚀
+    title: MCP Integration
+    details: Built-in Model Context Protocol server provides seamless integration with Claude and other MCP-compatible AI agents.
+  - icon: ⚡
+    title: Lightning Fast
+    details: Powered by SQLite FTS5 and LanceDB vector store, delivering sub-second search performance even on large codebases.
 ---
 
 ## Why ContextWeaver?
