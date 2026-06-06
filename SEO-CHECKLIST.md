@@ -63,10 +63,10 @@ This document outlines the SEO optimizations implemented for the ContextWeaver d
 
 ## 🔗 Important URLs
 
-- **Site**: https://contextweaver.dev
-- **Sitemap**: https://contextweaver.dev/sitemap.xml
-- **Robots**: https://contextweaver.dev/robots.txt
-- **OG Image**: https://contextweaver.dev/og-image.svg
+- **Site**: https://contextweaver.work
+- **Sitemap**: https://contextweaver.work/sitemap.xml
+- **Robots**: https://contextweaver.work/robots.txt
+- **OG Image**: https://contextweaver.work/og-image.svg
 
 ## 📈 Next Steps for SEO Improvement
 

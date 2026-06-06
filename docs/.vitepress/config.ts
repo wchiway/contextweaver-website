@@ -7,7 +7,7 @@ const socialLinks = [
 
 // SEO metadata
 const siteName = 'ContextWeaver'
-const siteUrl = 'https://contextweaver.dev'
+const siteUrl = 'https://contextweaver.work'
 const siteImage = `${siteUrl}/og-image.svg`
 
 export default withMermaid(defineConfig({
