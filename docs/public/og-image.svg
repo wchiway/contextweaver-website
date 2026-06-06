@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e293b;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Obsidian gradients -->
+    <linearGradient id="obs-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f1419;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="obs-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#a78bfa;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.3" />
+    </linearGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-grad)"/>
+
+  <!-- Logo -->
+  <g transform="translate(200, 165)">
+    <!-- Crystal facets -->
+    <path d="M 100 30 L 135 75 L 100 90 L 65 75 Z" fill="url(#obs-dark)" stroke="#7c3aed" stroke-width="2" opacity="0.95"/>
+    <path d="M 65 75 L 100 90 L 85 120 L 50 105 Z" fill="url(#obs-dark)" stroke="#a78bfa" stroke-width="1.5" opacity="0.9"/>
+    <path d="M 135 75 L 150 105 L 115 120 L 100 90 Z" fill="url(#obs-dark)" stroke="#a78bfa" stroke-width="1.5" opacity="0.9"/>
+    <path d="M 85 120 L 100 90 L 115 120 L 100 145 Z" fill="url(#obs-glow)" stroke="#8b5cf6" stroke-width="3" filter="url(#glow)"/>
+    <path d="M 50 105 L 85 120 L 100 145 L 70 160 Z" fill="url(#obs-dark)" stroke="#7c3aed" stroke-width="2" opacity="0.85"/>
+    <path d="M 150 105 L 130 160 L 100 145 L 115 120 Z" fill="url(#obs-dark)" stroke="#7c3aed" stroke-width="2" opacity="0.85"/>
+    <path d="M 70 160 L 100 145 L 130 160 L 100 175 Z" fill="url(#obs-dark)" stroke="#a78bfa" stroke-width="1.5" opacity="0.8"/>
+
+    <!-- Weaving lines -->
+    <line x1="40" y1="100" x2="160" y2="100" stroke="#8b5cf6" stroke-width="3" opacity="0.4" stroke-linecap="round"/>
+    <line x1="100" y1="35" x2="100" y2="170" stroke="#a78bfa" stroke-width="3" opacity="0.4" stroke-linecap="round"/>
+    <line x1="60" y1="60" x2="140" y2="145" stroke="#7c3aed" stroke-width="2.5" opacity="0.35" stroke-linecap="round"/>
+    <line x1="140" y1="60" x2="60" y2="145" stroke="#7c3aed" stroke-width="2.5" opacity="0.35" stroke-linecap="round"/>
+
+    <!-- Connection nodes -->
+    <circle cx="50" cy="105" r="4" fill="#8b5cf6" opacity="0.9"/>
+    <circle cx="150" cy="105" r="4" fill="#8b5cf6" opacity="0.9"/>
+    <circle cx="100" cy="30" r="4" fill="#a78bfa" opacity="0.9"/>
+    <circle cx="100" cy="175" r="4" fill="#a78bfa" opacity="0.9"/>
+    <circle cx="100" cy="117.5" r="6" fill="#c4b5fd" filter="url(#glow)" opacity="0.8"/>
+  </g>
+
+  <!-- Title -->
+  <text x="500" y="250" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="url(#obs-glow)" filter="url(#glow)">
+    ContextWeaver
+  </text>
+
+  <!-- Subtitle -->
+  <text x="500" y="320" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="600" fill="#e2e8f0">
+    Semantic Code Retrieval for AI Agents
+  </text>
+
+  <!-- Description -->
+  <text x="500" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#94a3b8" text-anchor="start">
+    <tspan x="500" dy="0">Delivering precise, context-rich code snippets through</tspan>
+    <tspan x="500" dy="32">hybrid search, graph expansion, and intelligent packing</tspan>
+  </text>
+
+  <!-- Features badges -->
+  <g transform="translate(500, 460)">
+    <rect x="0" y="0" width="160" height="40" rx="20" fill="#7c3aed" opacity="0.2"/>
+    <text x="80" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="#a78bfa" text-anchor="middle">
+      Hybrid Search
+    </text>
+
+    <rect x="180" y="0" width="140" height="40" rx="20" fill="#7c3aed" opacity="0.2"/>
+    <text x="250" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="#a78bfa" text-anchor="middle">
+      AST-Aware
+    </text>
+
+    <rect x="340" y="0" width="140" height="40" rx="20" fill="#7c3aed" opacity="0.2"/>
+    <text x="410" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="#a78bfa" text-anchor="middle">
+      MCP Ready
+    </text>
+  </g>
+
+  <!-- Footer -->
+  <text x="600" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#64748b" text-anchor="middle">
+    github.com/wchiway/contextweaver-mcp
+  </text>
+</svg>

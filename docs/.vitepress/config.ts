@@ -5,20 +5,60 @@ const socialLinks = [
   { icon: 'github', link: 'https://github.com/wchiway/contextweaver-mcp' }
 ] as const
 
+// SEO metadata
+const siteName = 'ContextWeaver'
+const siteUrl = 'https://contextweaver.dev'
+const siteImage = `${siteUrl}/og-image.svg`
+
 export default withMermaid(defineConfig({
   cleanUrls: true,
   metaChunk: true,
+  sitemap: {
+    hostname: siteUrl
+  },
   mermaid: {},
   mermaidPlugin: {
     class: 'mermaid'
   },
-  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]],
+  head: [
+    // Favicon
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+
+    // SEO
+    ['meta', { name: 'author', content: 'Chiway' }],
+    ['meta', { name: 'keywords', content: 'contextweaver, semantic search, code retrieval, AI agent, MCP, vector search, hybrid search, RAG, code context, tree-sitter, AST, LanceDB' }],
+
+    // Open Graph
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: siteName }],
+    ['meta', { property: 'og:image', content: siteImage }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+
+    // Twitter Card
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:image', content: siteImage }],
+    ['meta', { name: 'twitter:site', content: '@wchiway' }],
+    ['meta', { name: 'twitter:creator', content: '@wchiway' }],
+
+    // Additional SEO
+    ['meta', { name: 'theme-color', content: '#7c3aed' }],
+    ['link', { rel: 'canonical', href: siteUrl }]
+  ],
   locales: {
     root: {
       label: 'English',
       lang: 'en-US',
       title: 'ContextWeaver',
       description: 'Semantic code retrieval engine for AI coding agents.',
+      head: [
+        ['meta', { property: 'og:locale', content: 'en_US' }],
+        ['meta', { property: 'og:url', content: siteUrl }],
+        ['meta', { property: 'og:title', content: 'ContextWeaver - Semantic Code Retrieval for AI Agents' }],
+        ['meta', { property: 'og:description', content: 'Semantic code retrieval engine designed for AI coding agents — delivering precise, context-rich code snippets through hybrid search, graph expansion, and intelligent packing.' }],
+        ['meta', { name: 'twitter:title', content: 'ContextWeaver - Semantic Code Retrieval for AI Agents' }],
+        ['meta', { name: 'twitter:description', content: 'Semantic code retrieval engine designed for AI coding agents — delivering precise, context-rich code snippets through hybrid search, graph expansion, and intelligent packing.' }]
+      ],
       themeConfig: {
         siteTitle: 'ContextWeaver',
         logo: { src: '/logo.svg', alt: 'ContextWeaver' },
@@ -86,6 +126,14 @@ export default withMermaid(defineConfig({
       link: '/zh/',
       title: 'ContextWeaver',
       description: '为 AI Agent 设计的语义代码检索引擎。',
+      head: [
+        ['meta', { property: 'og:locale', content: 'zh_CN' }],
+        ['meta', { property: 'og:url', content: `${siteUrl}/zh/` }],
+        ['meta', { property: 'og:title', content: 'ContextWeaver - 为 AI Agent 设计的语义代码检索引擎' }],
+        ['meta', { property: 'og:description', content: '专为 AI 编码代理设计的语义检索引擎 — 通过混合检索、图式扩展与智能打包，提供精准且富含上下文的代码片段。' }],
+        ['meta', { name: 'twitter:title', content: 'ContextWeaver - 为 AI Agent 设计的语义代码检索引擎' }],
+        ['meta', { name: 'twitter:description', content: '专为 AI 编码代理设计的语义检索引擎 — 通过混合检索、图式扩展与智能打包，提供精准且富含上下文的代码片段。' }]
+      ],
       themeConfig: {
         siteTitle: 'ContextWeaver',
         logo: { src: '/logo.svg', alt: 'ContextWeaver' },
