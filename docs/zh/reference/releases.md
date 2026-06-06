@@ -6,6 +6,7 @@
 
 | 版本 | 类型 | 发布时间 | 链接 | 变更范围 |
 | --- | --- | --- | --- | --- |
+| `v1.5.3` | 稳定版 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta 预发布 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta 预发布 | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
 | `v1.5.3-alpha.0` | Alpha 预发布 | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-alpha.0) | [v1.5.2...v1.5.3-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3-alpha.0) |
@@ -14,6 +15,60 @@
 | `v1.5.0` | 稳定版 | 2026-06-02 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.0) | [v1.4.0...v1.5.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.4.0...v1.5.0) |
 | `v1.4.0` | 稳定版 tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | 基线提交 | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
+
+## v1.5.3
+
+[Release 页面](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) · [完整变更](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3)
+
+### 主要更新
+
+#### 语义图与符号索引
+
+- 新增基于 Tree-sitter tags 的符号提取，索引结果写入新的 `semantic_symbols` 表。
+- 新增语义调用边提取，覆盖 TypeScript、JavaScript、Python、Go、Rust、Java、C、C++、C#、Ruby、PHP。
+- 新增 `list-symbols` MCP 工具，可按路径、符号类型、语言和来源浏览符号大纲。
+- 优化 `get-symbol-definition`：优先查询已索引的 `semantic_symbols` 定义，再回退到词法匹配。
+- 修复 `semantic_edges` 增量清理：文件修改后即使没有调用点或没有匹配到本地符号，也会删除旧调用边，避免语义图残留过期关系。
+
+#### 向量索引 readiness 与恢复
+
+- 新增 `contextweaver update` 命令，用于检查包更新并引导升级。
+- 新增 `vector_manifest` readiness 表，让 SQLite 成为向量索引状态的权威来源，LanceDB 作为派生向量物化层。
+- 搜索与图扩展只信任 hash 匹配且 ready 的文件，降低过期或部分写入向量被召回的风险。
+- 增加 pending vector marks 和无 chunk 文件的收敛路径，避免重复扫描持续重试。
+
+#### 发布与 Registry 准备
+
+- 通过 `server.json` 和 `package.json#mcpName` 增加 MCP Registry 元数据。
+- 增加 stable / prerelease GitHub Actions 发布路径，接入 npm trusted publishing 和 MCP Registry OIDC 认证。
+- 修复 prerelease workflow 的 OIDC 权限，并删除无效悬挂的 `files` 字段。
+- 修复 `1.5.3-rc.0` review 中发现的 typecheck、lint、format 和空白问题。
+
+### Schema 更新
+
+- 数据库 schema version 升级到 `5`。
+- 新增表：`vector_manifest`、`semantic_symbols`、`semantic_edges`。
+- `semantic_symbols` 按文件 hash 和符号元数据存储提取到的定义。
+- `semantic_edges` 存储语义关系，包括本地 Tree-sitter 调用边。
+
+### 质量与验证
+
+- 恢复并扩展 `getSymbolDefinition` 测试。
+- 新增 `semantic_symbols` 主键行为回归测试。
+- 新增 `semantic_edges` 旧调用边清理回归测试，覆盖文件失去调用点和调用点无法匹配本地符号的场景。
+- 最终发布验证通过：
+  - `pnpm typecheck`
+  - `pnpm run lint`
+  - `pnpm test` — 124 个测试文件 / 603 个测试通过
+  - `pnpm build`
+
+### 安装
+
+```bash
+npm install -g @chiway/contextweaver@1.5.3
+# 或
+pnpm add -g @chiway/contextweaver@1.5.3
+```
 
 ## v1.5.3-beta.1
 

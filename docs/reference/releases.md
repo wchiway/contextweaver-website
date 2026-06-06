@@ -6,6 +6,7 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 
 | Version | Type | Published | Link | Changes |
 | --- | --- | --- | --- | --- |
+| `v1.5.3` | Stable | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta prerelease | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta prerelease | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
 | `v1.5.3-alpha.0` | Alpha prerelease | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-alpha.0) | [v1.5.2...v1.5.3-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3-alpha.0) |
@@ -14,6 +15,60 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 | `v1.5.0` | Stable | 2026-06-02 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.0) | [v1.4.0...v1.5.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.4.0...v1.5.0) |
 | `v1.4.0` | Stable tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | Baseline commit | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
+
+## v1.5.3
+
+[Release page](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) · [Full changes](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3)
+
+### Highlights
+
+#### Semantic graph and symbol indexing
+
+- Added Tree-sitter tags based symbol extraction for indexed source files, stored in the new `semantic_symbols` table.
+- Added semantic call edge extraction for TypeScript, JavaScript, Python, Go, Rust, Java, C, C++, C#, Ruby, and PHP.
+- Added the `list-symbols` MCP tool for browsing symbols by path, kind, language, and source.
+- Improved `get-symbol-definition` by preferring indexed `semantic_symbols` definitions before falling back to lexical matches.
+- Added incremental cleanup for `semantic_edges`, so changed files remove stale call edges even when the new version has no call sites or no matched local symbols.
+
+#### Vector index readiness and recovery
+
+- Added the `contextweaver update` command for package update checks and guided upgrades.
+- Added the `vector_manifest` readiness table, making SQLite the authoritative source of vector index state while LanceDB remains the derived materialization layer.
+- Search and graph expansion now trust only files whose vector readiness is hash-matched, reducing stale or partially written vector recall.
+- Added recovery paths for pending vector marks and no-chunk files so repeated scans converge instead of retrying indefinitely.
+
+#### Release and registry readiness
+
+- Added MCP Registry metadata via `server.json` and `package.json#mcpName`.
+- Added stable and prerelease GitHub Actions publishing paths with npm trusted publishing and MCP Registry OIDC authentication.
+- Fixed prerelease workflow OIDC permissions and removed an invalid dangling `files` key.
+- Fixed release-blocking typecheck, lint, formatting, and whitespace issues found during the `1.5.3-rc.0` review.
+
+### Schema updates
+
+- Database schema version advances to `5`.
+- New tables: `vector_manifest`, `semantic_symbols`, and `semantic_edges`.
+- `semantic_symbols` stores extracted definitions by file hash and symbol metadata.
+- `semantic_edges` stores semantic relationships, including local Tree-sitter call edges.
+
+### Quality and verification
+
+- Restored and expanded `getSymbolDefinition` tests.
+- Added regression coverage for `semantic_symbols` primary-key behavior.
+- Added regression coverage for stale `semantic_edges` cleanup when files lose call sites or no longer match local symbols.
+- Final release validation passed:
+  - `pnpm typecheck`
+  - `pnpm run lint`
+  - `pnpm test` — 124 test files / 603 tests passed
+  - `pnpm build`
+
+### Installation
+
+```bash
+npm install -g @chiway/contextweaver@1.5.3
+# or
+pnpm add -g @chiway/contextweaver@1.5.3
+```
 
 ## v1.5.3-beta.1
 
