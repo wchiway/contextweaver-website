@@ -24,6 +24,9 @@ export default withMermaid(defineConfig({
     // Favicon
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
 
+    // Site verification
+    ['meta', { name: 'msvalidate.01', content: '28E0969A71102B3FC709E88F1EE1D920' }],
+
     // SEO
     ['meta', { name: 'author', content: 'Chiway' }],
     ['meta', { name: 'keywords', content: 'contextweaver, semantic search, code retrieval, AI agent, MCP, vector search, hybrid search, RAG, code context, tree-sitter, AST, LanceDB' }],
