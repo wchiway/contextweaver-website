@@ -6,6 +6,7 @@
 
 | 版本 | 类型 | 发布时间 | 链接 | 变更范围 |
 | --- | --- | --- | --- | --- |
+| `v1.6.0-alpha.0` | Alpha 预发布 | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) | [v1.5.3...v1.6.0-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0) |
 | `v1.5.3` | 稳定版 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta 预发布 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta 预发布 | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
@@ -15,6 +16,37 @@
 | `v1.5.0` | 稳定版 | 2026-06-02 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.0) | [v1.4.0...v1.5.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.4.0...v1.5.0) |
 | `v1.4.0` | 稳定版 tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | 基线提交 | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
+
+## v1.6.0-alpha.0
+
+[Release 页面](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) · [完整变更](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0)
+
+> 首个包含 Rust napi-rs 原生分片器的预发布版本。仅创建 GitHub pre-release 和全平台测试 tarball，不发布到 npm，用于验证跨平台 optionalDependencies 安装链与 native / TS fallback 行为。
+
+### 主要更新
+
+#### Rust 原生分片器（napi-rs）
+
+- 将 CPU 密集的分片层（Tree-sitter 解析 + AST 遍历 + 切窗 + 符号/调用点提取）迁移到 `crates/chunker` 原生模块。
+- `processor.ts` 优先走 Rust 单次解析路径（`process_file`），复用同一棵语法树一次性产出 chunks、symbols、callSites，避免重复解析。
+- napi 模块加载失败（冷门平台无预构建二进制、或开发环境未构建）时透明回退到现有 TypeScript 分片实现，保证全平台可用。
+- 所有 LanceDB 偏移字段在 Rust 侧统一归一到 UTF-16 字符域，与 TS `SourceAdapter` 保持字节级一致。
+
+#### 跨平台构建与发布
+
+- `release.yml` 改为三阶段：`build`（5 平台 napi matrix：linux-x64-gnu / linux-arm64-gnu / darwin-x64 / darwin-arm64 / win32-x64-msvc，arm64-linux 用 `--use-napi-cross` 交叉编译）→ `publish-chunker`（平台子包 → chunker 主包）→ `publish-main`（主应用包 → GitHub Release → MCP Registry），由 `needs` 强制发布时序。
+- 分发采用两层 optionalDependencies：主应用包 → `@chiway/contextweaver-chunker`（napi loader 主包）→ 5 个平台子包；缺包时回退 TS。
+- `prerelease.yml` 同步 build matrix，打包全平台 tarball 作 GitHub Prerelease 附件，不发布 npm。
+- 在 arm64 macOS runner 上交叉编译 darwin-x64，并在 build/publish 任务使用 `--no-frozen-lockfile`。
+
+### 质量与验证
+
+- 新增对拍测试锁定 UTF-16 偏移域一致性：`SourceAdapter`、`SemanticSplitter`、`Symbols`、`CallSites` 的 Rust 输出与 TS 输出逐字段比对。
+- 新增 `processor` 端到端集成测试，断言构建后环境实际走 native 路径。
+
+### 安装
+
+> 预发布版本不发布到 npm，仅可从 GitHub Release 下载对应平台 tarball 进行本地测试。
 
 ## v1.5.3
 

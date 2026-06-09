@@ -6,6 +6,7 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 
 | Version | Type | Published | Link | Changes |
 | --- | --- | --- | --- | --- |
+| `v1.6.0-alpha.0` | Alpha prerelease | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) | [v1.5.3...v1.6.0-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0) |
 | `v1.5.3` | Stable | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta prerelease | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta prerelease | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
@@ -15,6 +16,37 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 | `v1.5.0` | Stable | 2026-06-02 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.0) | [v1.4.0...v1.5.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.4.0...v1.5.0) |
 | `v1.4.0` | Stable tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | Baseline commit | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
+
+## v1.6.0-alpha.0
+
+[Release page](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) · [Full changes](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0)
+
+> First prerelease shipping the Rust napi-rs native chunker. It creates a GitHub pre-release and all-platform testing tarballs only; it is not published to npm. Used to validate the cross-platform optionalDependencies install chain and native / TS fallback behavior.
+
+### Highlights
+
+#### Native Rust chunker (napi-rs)
+
+- Migrated the CPU-intensive chunking layer (Tree-sitter parsing + AST traversal + windowing + symbol/call-site extraction) to the `crates/chunker` native module.
+- `processor.ts` now prefers the Rust single-parse path (`process_file`), reusing one syntax tree to produce chunks, symbols, and call sites in a single pass.
+- When the napi module fails to load (no prebuilt binary on uncommon platforms, or an unbuilt dev environment), it transparently falls back to the existing TypeScript chunker, keeping the package usable everywhere.
+- All LanceDB offset fields are normalized to the UTF-16 character domain on the Rust side, kept byte-for-byte consistent with the TS `SourceAdapter`.
+
+#### Cross-platform build and release
+
+- `release.yml` becomes three-staged: `build` (5-platform napi matrix: linux-x64-gnu / linux-arm64-gnu / darwin-x64 / darwin-arm64 / win32-x64-msvc, with `--use-napi-cross` for arm64-linux) → `publish-chunker` (platform subpackages → chunker main package) → `publish-main` (main app package → GitHub Release → MCP Registry), with `needs` enforcing publish ordering.
+- Distribution uses two layers of optionalDependencies: main app package → `@chiway/contextweaver-chunker` (napi loader main package) → 5 platform subpackages; falls back to TS when a package is missing.
+- `prerelease.yml` mirrors the build matrix and packages all-platform tarballs as GitHub Prerelease assets without publishing to npm.
+- Cross-compile darwin-x64 on an arm64 macOS runner, and use `--no-frozen-lockfile` in build/publish jobs.
+
+### Quality and verification
+
+- Added differential tests pinning UTF-16 offset-domain consistency: `SourceAdapter`, `SemanticSplitter`, `Symbols`, and `CallSites` Rust output compared field-by-field against TS output.
+- Added a `processor` end-to-end integration test asserting that the built environment actually takes the native path.
+
+### Installation
+
+> Prereleases are not published to npm. Download the matching platform tarball from the GitHub Release for local testing.
 
 ## v1.5.3
 
