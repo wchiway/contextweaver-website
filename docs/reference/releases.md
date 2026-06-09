@@ -6,6 +6,7 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 
 | Version | Type | Published | Link | Changes |
 | --- | --- | --- | --- | --- |
+| `v1.6.0-alpha.1` | Alpha prerelease | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.1) | [v1.6.0-alpha.0...v1.6.0-alpha.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.6.0-alpha.0...v1.6.0-alpha.1) |
 | `v1.6.0-alpha.0` | Alpha prerelease | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) | [v1.5.3...v1.6.0-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0) |
 | `v1.5.3` | Stable | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta prerelease | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
@@ -19,20 +20,42 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 
 ## Unreleased
 
-> Continues the native migration roadmap (P1): the import resolvers' `extract()` is ported to Rust. Pure speedup with a clean TypeScript fallback; the path-resolution logic (`resolve()`) stays in TypeScript and is unaffected.
+> No pending changes.
+
+## v1.6.0-alpha.1
+
+[Release page](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.1) · [Full changes](https://github.com/wchiway/contextweaver-mcp/compare/v1.6.0-alpha.0...v1.6.0-alpha.1)
+
+> Continues the native migration roadmap with P1 (import resolver `extract()`) and P2 (encoding detect/decode) ported to Rust. Both are pure speedups with clean TypeScript fallbacks. With these, all CPU-bound hotspots (chunking/AST, import extraction, encoding decode) now run natively; the remaining scanner `hash`/`filter` modules were evaluated and intentionally kept in TypeScript.
 
 ### Highlights
 
-#### Native import extraction (Rust regex port)
+#### Native import extraction (Rust regex port) — P1
 
 - Ported the 7 import resolvers' `extract()` regex to the `crates/chunker` native module via `extractImports(kind, content)` (kinds: `jsts` / `python` / `go` / `java` / `rust` / `cpp` / `csharp`).
 - Output is byte-for-byte identical to the TypeScript regex, so the TypeScript-side `resolve()` keeps working unchanged. GraphExpander's E3 import expansion — called on every search for each seed file — now runs through the native path when available.
 - Handled JS/Rust regex divergence: ASCII `\w` semantics, and the C# `(?!static)(?!global)` negative lookahead (unsupported by Rust `regex`) emulated in code.
 - When the native module is unavailable, each resolver transparently falls back to its original TypeScript regex (`extractTs`).
 
+#### Native encoding detect/decode (Rust) — P2
+
+- Ported the detect+decode step of `readFileWithEncoding` to the `crates/chunker` native module via `decodeBytes(buffer)`, backed by `chardetng` (Firefox's encoding detector) + `encoding_rs` (Gecko engine), replacing the JS `chardet` + `iconv-lite`.
+- BOM sniffing mirrors the TypeScript logic; UTF-32 (LE/BE) is decoded manually since `encoding_rs` does not support it. Output is always UTF-8.
+- `readFileWithEncoding` reads bytes in Node (`fs.readFile` stays in TypeScript), then prefers `decodeBytes`; on missing native binary or error it falls back to the original `chardet`/`iconv-lite` path (`decodeBytesTs`).
+
+#### Migration scope concluded
+
+- Evaluated the deferred scanner modules and decided **not** to migrate them: `hash.ts` (`sha256`) already runs on Node's OpenSSL-backed `crypto`, so a Rust port would only add a string copy across the NAPI boundary; `filter.ts` is I/O-bound and built on the mature npm `ignore` library, where a Rust rewrite risks byte-level gitignore divergence for no bottleneck gain.
+
 ### Quality and verification
 
-- Added a `tests/search/ImportExtract.diff.test.ts` differential test asserting native and TypeScript output match byte-for-byte across all 7 kinds, edge cases (in-string / comment imports, C# static/global exclusion, Rust `pub mod`, Go block imports), and a sample of real repository source files.
+- `tests/search/ImportExtract.diff.test.ts`: asserts native and TypeScript import output match byte-for-byte across all 7 kinds, edge cases (in-string / comment imports, C# static/global exclusion, Rust `pub mod`, Go block imports), and a sample of real repository source files.
+- `tests/utils/Encoding.diff.test.ts`: asserts native `decodeBytes` content matches the `chardet`/`iconv-lite` path on BOM and long CJK (GB18030 / Big5 / Shift_JIS) samples where detection converges; short ambiguous single-byte cases (where detector divergence is acceptable per design) are excluded.
+- Full suite green (701 tests) with the native module built.
+
+### Installation
+
+> Prerelease versions are not published to npm; download the platform tarball from the GitHub Release for local testing only.
 
 ## v1.6.0-alpha.0
 

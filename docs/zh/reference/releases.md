@@ -6,6 +6,7 @@
 
 | 版本 | 类型 | 发布时间 | 链接 | 变更范围 |
 | --- | --- | --- | --- | --- |
+| `v1.6.0-alpha.1` | Alpha 预发布 | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.1) | [v1.6.0-alpha.0...v1.6.0-alpha.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.6.0-alpha.0...v1.6.0-alpha.1) |
 | `v1.6.0-alpha.0` | Alpha 预发布 | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) | [v1.5.3...v1.6.0-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0) |
 | `v1.5.3` | 稳定版 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta 预发布 | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
@@ -19,20 +20,42 @@
 
 ## 未发布
 
-> 延续原生迁移路线（P1）：将导入解析器的 `extract()` 迁移到 Rust。纯加速，保留干净的 TypeScript 回退；路径解析逻辑（`resolve()`）仍留在 TypeScript，不受影响。
+> 暂无待发布变更。
+
+## v1.6.0-alpha.1
+
+[Release 页面](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.1) · [完整变更](https://github.com/wchiway/contextweaver-mcp/compare/v1.6.0-alpha.0...v1.6.0-alpha.1)
+
+> 延续原生迁移路线，落地 P1（导入解析器 `extract()`）与 P2（编码检测/转码），均为纯加速并保留干净的 TypeScript 回退。至此，全部 CPU 密集热点（分片/AST、导入提取、编码解码）均已走原生；剩余的 scanner `hash`/`filter` 模块经评估后有意保留在 TypeScript。
 
 ### 主要更新
 
-#### 原生导入提取（Rust 正则移植）
+#### 原生导入提取（Rust 正则移植）— P1
 
 - 将 7 个导入解析器的 `extract()` 正则迁移到 `crates/chunker` 原生模块，通过 `extractImports(kind, content)` 暴露（kind：`jsts` / `python` / `go` / `java` / `rust` / `cpp` / `csharp`）。
 - 输出与 TypeScript 正则逐字节一致，因此 TypeScript 侧的 `resolve()` 无需改动即可继续工作。GraphExpander 的 E3 导入扩展（每次搜索对每个 seed 文件都会调用）在原生模块可用时走原生路径。
 - 处理了 JS/Rust 正则差异：`\w` 统一为 ASCII 语义；C# 的 `(?!static)(?!global)` 负向先行断言（Rust `regex` 不支持）在代码层模拟。
 - 原生模块不可用时，每个解析器透明回退到原有的 TypeScript 正则（`extractTs`）。
 
+#### 原生编码检测/转码（Rust）— P2
+
+- 将 `readFileWithEncoding` 的检测+解码步骤迁移到 `crates/chunker` 原生模块，通过 `decodeBytes(buffer)` 暴露，底层用 `chardetng`（Firefox 同款编码检测器）+ `encoding_rs`（Gecko 编码引擎）替代 JS 的 `chardet` + `iconv-lite`。
+- BOM 检测逻辑与 TypeScript 一致；UTF-32（LE/BE）因 `encoding_rs` 不支持而手写解码。输出始终为 UTF-8。
+- `readFileWithEncoding` 在 Node 侧读取字节（`fs.readFile` 仍留在 TypeScript），优先调 `decodeBytes`；缺少原生二进制或抛错时回退到原有的 `chardet`/`iconv-lite` 路径（`decodeBytesTs`）。
+
+#### 迁移范围收尾
+
+- 评估暂缓的 scanner 模块后决定**不迁移**：`hash.ts`（`sha256`）已走 Node OpenSSL 实现的 `crypto`，改 Rust 只会多一次正文字符串跨 NAPI 拷贝；`filter.ts` 是 I/O 绑定且基于成熟的 npm `ignore` 库，Rust 重写有 gitignore 字节级行为分歧风险，而过滤本身非索引瓶颈。
+
 ### 质量与验证
 
-- 新增 `tests/search/ImportExtract.diff.test.ts` 差分测试：断言原生与 TypeScript 输出在全部 7 种 kind、各边界用例（字符串/注释内的伪 import、C# static/global 排除、Rust `pub mod`、Go 块导入）以及若干真实仓库源文件上逐字节一致。
+- `tests/search/ImportExtract.diff.test.ts`：断言原生与 TypeScript 导入输出在全部 7 种 kind、各边界用例（字符串/注释内伪 import、C# static/global 排除、Rust `pub mod`、Go 块导入）以及若干真实仓库源文件上逐字节一致。
+- `tests/utils/Encoding.diff.test.ts`：断言原生 `decodeBytes` 的内容与 `chardet`/`iconv-lite` 路径在 BOM 及长 CJK（GB18030 / Big5 / Shift_JIS）样本（检测稳定收敛）上一致；短的歧义单字节样本（按设计允许检测器分歧）不纳入。
+- 构建原生模块后全量测试通过（701 个）。
+
+### 安装
+
+> 预发布版本不发布到 npm，仅可从 GitHub Release 下载对应平台 tarball 进行本地测试。
 
 ## v1.6.0-alpha.0
 
