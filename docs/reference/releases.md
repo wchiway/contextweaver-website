@@ -17,6 +17,23 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 | `v1.4.0` | Stable tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | Baseline commit | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
 
+## Unreleased
+
+> Continues the native migration roadmap (P1): the import resolvers' `extract()` is ported to Rust. Pure speedup with a clean TypeScript fallback; the path-resolution logic (`resolve()`) stays in TypeScript and is unaffected.
+
+### Highlights
+
+#### Native import extraction (Rust regex port)
+
+- Ported the 7 import resolvers' `extract()` regex to the `crates/chunker` native module via `extractImports(kind, content)` (kinds: `jsts` / `python` / `go` / `java` / `rust` / `cpp` / `csharp`).
+- Output is byte-for-byte identical to the TypeScript regex, so the TypeScript-side `resolve()` keeps working unchanged. GraphExpander's E3 import expansion — called on every search for each seed file — now runs through the native path when available.
+- Handled JS/Rust regex divergence: ASCII `\w` semantics, and the C# `(?!static)(?!global)` negative lookahead (unsupported by Rust `regex`) emulated in code.
+- When the native module is unavailable, each resolver transparently falls back to its original TypeScript regex (`extractTs`).
+
+### Quality and verification
+
+- Added a `tests/search/ImportExtract.diff.test.ts` differential test asserting native and TypeScript output match byte-for-byte across all 7 kinds, edge cases (in-string / comment imports, C# static/global exclusion, Rust `pub mod`, Go block imports), and a sample of real repository source files.
+
 ## v1.6.0-alpha.0
 
 [Release page](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) · [Full changes](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0)

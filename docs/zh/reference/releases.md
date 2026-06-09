@@ -17,6 +17,23 @@
 | `v1.4.0` | 稳定版 tag | 2026-05-19 | [Git tag](https://github.com/wchiway/contextweaver-mcp/tree/v1.4.0) | [v1.0.0 commit...v1.4.0](https://github.com/wchiway/contextweaver-mcp/compare/da79f2931157aa06b08aab99aaa4d43bcfa43f66...v1.4.0) |
 | `v1.0.0` | 基线提交 | 2026-03-13 | [Commit](https://github.com/wchiway/contextweaver-mcp/commit/da79f2931157aa06b08aab99aaa4d43bcfa43f66) | [v0.0.7...v1.0.0 commit](https://github.com/wchiway/contextweaver-mcp/compare/v0.0.7...da79f2931157aa06b08aab99aaa4d43bcfa43f66) |
 
+## 未发布
+
+> 延续原生迁移路线（P1）：将导入解析器的 `extract()` 迁移到 Rust。纯加速，保留干净的 TypeScript 回退；路径解析逻辑（`resolve()`）仍留在 TypeScript，不受影响。
+
+### 主要更新
+
+#### 原生导入提取（Rust 正则移植）
+
+- 将 7 个导入解析器的 `extract()` 正则迁移到 `crates/chunker` 原生模块，通过 `extractImports(kind, content)` 暴露（kind：`jsts` / `python` / `go` / `java` / `rust` / `cpp` / `csharp`）。
+- 输出与 TypeScript 正则逐字节一致，因此 TypeScript 侧的 `resolve()` 无需改动即可继续工作。GraphExpander 的 E3 导入扩展（每次搜索对每个 seed 文件都会调用）在原生模块可用时走原生路径。
+- 处理了 JS/Rust 正则差异：`\w` 统一为 ASCII 语义；C# 的 `(?!static)(?!global)` 负向先行断言（Rust `regex` 不支持）在代码层模拟。
+- 原生模块不可用时，每个解析器透明回退到原有的 TypeScript 正则（`extractTs`）。
+
+### 质量与验证
+
+- 新增 `tests/search/ImportExtract.diff.test.ts` 差分测试：断言原生与 TypeScript 输出在全部 7 种 kind、各边界用例（字符串/注释内的伪 import、C# static/global 排除、Rust `pub mod`、Go 块导入）以及若干真实仓库源文件上逐字节一致。
+
 ## v1.6.0-alpha.0
 
 [Release 页面](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) · [完整变更](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0)
