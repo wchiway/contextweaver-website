@@ -8,6 +8,7 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 | --- | --- | --- | --- | --- |
 | `v1.6.0-alpha.1` | Alpha prerelease | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.1) | [v1.6.0-alpha.0...v1.6.0-alpha.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.6.0-alpha.0...v1.6.0-alpha.1) |
 | `v1.6.0-alpha.0` | Alpha prerelease | 2026-06-09 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.6.0-alpha.0) | [v1.5.3...v1.6.0-alpha.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.6.0-alpha.0) |
+| `v1.5.4` | Stable | 2026-06-13 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.4) | [v1.5.3...v1.5.4](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.5.4) |
 | `v1.5.3` | Stable | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3) | [v1.5.2...v1.5.3](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.2...v1.5.3) |
 | `v1.5.3-beta.1` | Beta prerelease | 2026-06-06 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.1) | [v1.5.3-beta.0...v1.5.3-beta.1](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-beta.0...v1.5.3-beta.1) |
 | `v1.5.3-beta.0` | Beta prerelease | 2026-06-05 | [GitHub Release](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.3-beta.0) | [v1.5.3-alpha.0...v1.5.3-beta.0](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3-alpha.0...v1.5.3-beta.0) |
@@ -21,6 +22,47 @@ This page summarizes ContextWeaver changelogs from the `v1.0.0` baseline onward.
 ## Unreleased
 
 > No pending changes.
+
+## v1.5.4
+
+[Release page](https://github.com/wchiway/contextweaver-mcp/releases/tag/v1.5.4) · [Full changes](https://github.com/wchiway/contextweaver-mcp/compare/v1.5.3...v1.5.4)
+
+> Adds the `contextweaver config` command for managing environment variables through the CLI, eliminating the need to manually edit `.env` files. Supports listing, setting, validating, and interactive wizard-based configuration.
+
+### New Features
+
+#### Config Command
+
+- **`config list`**: View current configuration with automatic masking of sensitive information (API keys)
+- **`config set <key> <value>`**: Set individual environment variables with validation
+- **`config validate`**: Verify that all required configuration is valid
+- **`config wizard`**: Interactive setup wizard for guided configuration
+
+Supported configuration keys:
+- Embedding settings: `EMBEDDINGS_API_KEY`, `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_MODEL`, `EMBEDDINGS_MAX_CONCURRENCY`, `EMBEDDINGS_DIMENSIONS`
+- Reranker settings: `RERANK_API_KEY`, `RERANK_BASE_URL`, `RERANK_MODEL`, `RERANK_TOP_N`
+- Search parameters: `CW_SEARCH_WVEC`, `CW_SEARCH_WLEX`, `CW_SEARCH_RERANK_TOP_N`, `CW_SEARCH_MAX_TOTAL_CHARS`, `CW_SEARCH_VECTOR_TOP_K`, `CW_SEARCH_SMART_MAX_K`, `CW_SEARCH_IMPORT_FILES_PER_SEED`
+- Other: `IGNORE_PATTERNS`
+
+**Usage examples:**
+
+```bash
+# View current configuration
+contextweaver config list
+
+# Set a configuration value
+contextweaver config set EMBEDDINGS_MAX_CONCURRENCY 20
+
+# Validate configuration
+contextweaver config validate
+
+# Interactive configuration wizard
+contextweaver config wizard
+```
+
+### Documentation
+
+- Added comprehensive config command documentation (`docs/config-command.md`) with usage guides, best practices, and troubleshooting
 
 ## v1.6.0-alpha.1
 

@@ -9,6 +9,51 @@ cw init
 
 创建或更新 `~/.contextweaver/.env` 配置文件。
 
+## 配置管理
+
+```bash
+contextweaver config list
+contextweaver config set <key> <value>
+contextweaver config validate
+contextweaver config wizard
+```
+
+管理环境变量配置：
+
+- **`config list`**（别名：`ls`）- 查看当前配置，敏感值自动掩码
+- **`config set`** - 设置单个环境变量，带验证
+- **`config validate`** - 验证所有必需配置是否有效
+- **`config wizard`** - 交互式配置向导
+
+**示例：**
+
+```bash
+# 查看当前配置
+contextweaver config list
+
+# 设置 Embedding 并发数
+contextweaver config set EMBEDDINGS_MAX_CONCURRENCY 20
+
+# 设置向量维度
+contextweaver config set EMBEDDINGS_DIMENSIONS 2048
+
+# 设置搜索参数
+contextweaver config set CW_SEARCH_WVEC 0.6
+
+# 验证配置
+contextweaver config validate
+
+# 交互式向导
+contextweaver config wizard
+```
+
+**可用的配置键：**
+
+- **Embedding**：`EMBEDDINGS_API_KEY`、`EMBEDDINGS_BASE_URL`、`EMBEDDINGS_MODEL`、`EMBEDDINGS_MAX_CONCURRENCY`、`EMBEDDINGS_DIMENSIONS`
+- **Reranker**：`RERANK_API_KEY`、`RERANK_BASE_URL`、`RERANK_MODEL`、`RERANK_TOP_N`
+- **搜索参数**：`CW_SEARCH_WVEC`、`CW_SEARCH_WLEX`、`CW_SEARCH_RERANK_TOP_N`、`CW_SEARCH_MAX_TOTAL_CHARS`、`CW_SEARCH_VECTOR_TOP_K`、`CW_SEARCH_SMART_MAX_K`、`CW_SEARCH_IMPORT_FILES_PER_SEED`
+- **其他**：`IGNORE_PATTERNS`
+
 ## 索引
 
 ```bash
@@ -16,7 +61,7 @@ contextweaver index [path]
 contextweaver index --force
 ```
 
-索引代码库，生成 SQLite 元数据、FTS 索引与 LanceDB 向量索引。
+索引代码库，生成 SQLite 元数据、FTS 索引与 LanceDB 向量索引.
 
 ## 搜索
 

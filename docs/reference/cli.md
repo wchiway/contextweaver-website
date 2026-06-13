@@ -9,6 +9,51 @@ cw init
 
 Create or update the `~/.contextweaver/.env` configuration file.
 
+## Config
+
+```bash
+contextweaver config list
+contextweaver config set <key> <value>
+contextweaver config validate
+contextweaver config wizard
+```
+
+Manage environment variable configuration:
+
+- **`config list`** (alias: `ls`) - View current configuration with masked sensitive values
+- **`config set`** - Set a single environment variable with validation
+- **`config validate`** - Verify all required configuration is valid
+- **`config wizard`** - Interactive setup wizard for guided configuration
+
+**Examples:**
+
+```bash
+# View current configuration
+contextweaver config list
+
+# Set embedding concurrency
+contextweaver config set EMBEDDINGS_MAX_CONCURRENCY 20
+
+# Set vector dimensions
+contextweaver config set EMBEDDINGS_DIMENSIONS 2048
+
+# Set search parameters
+contextweaver config set CW_SEARCH_WVEC 0.6
+
+# Validate configuration
+contextweaver config validate
+
+# Interactive wizard
+contextweaver config wizard
+```
+
+**Available configuration keys:**
+
+- **Embedding**: `EMBEDDINGS_API_KEY`, `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_MODEL`, `EMBEDDINGS_MAX_CONCURRENCY`, `EMBEDDINGS_DIMENSIONS`
+- **Reranker**: `RERANK_API_KEY`, `RERANK_BASE_URL`, `RERANK_MODEL`, `RERANK_TOP_N`
+- **Search**: `CW_SEARCH_WVEC`, `CW_SEARCH_WLEX`, `CW_SEARCH_RERANK_TOP_N`, `CW_SEARCH_MAX_TOTAL_CHARS`, `CW_SEARCH_VECTOR_TOP_K`, `CW_SEARCH_SMART_MAX_K`, `CW_SEARCH_IMPORT_FILES_PER_SEED`
+- **Other**: `IGNORE_PATTERNS`
+
 ## Index
 
 ```bash
